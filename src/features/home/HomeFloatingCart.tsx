@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export type CartItem = {
   name: string;
   price: number;
@@ -44,21 +46,35 @@ export default function HomeFloatingCart({
     <>
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white md:hidden">
         <div className="grid grid-cols-4 text-center text-[11px] font-medium text-slate-700">
-          {["Home", "Shop", "Brands", "Bag"].map((label) => (
-            <a key={label} href="#" className="px-2 py-3 hover:bg-stone-50">
-              <div className="text-base">â€¢</div>
-              <div>{label}</div>
-            </a>
-          ))}
+          <Link href="/" className="px-2 py-3 hover:bg-stone-50">
+            <div className="text-base">•</div>
+            <div>Home</div>
+          </Link>
+          <Link href="/products" className="px-2 py-3 hover:bg-stone-50">
+            <div className="text-base">•</div>
+            <div>Shop</div>
+          </Link>
+          <Link href="/brands" className="px-2 py-3 hover:bg-stone-50">
+            <div className="text-base">•</div>
+            <div>Brands</div>
+          </Link>
+          <button type="button" onClick={onOpenCart} className="px-2 py-3 hover:bg-stone-50">
+            <div className="text-base">•</div>
+            <div>Bag</div>
+          </button>
         </div>
       </div>
 
-      <a onClick={(e) => { e.preventDefault(); onOpenCart(); }} href="#" className="group fixed right-0 top-1/2 z-40 -translate-y-1/2 overflow-hidden rounded-l-2xl border border-slate-200 shadow-xl transition-all duration-300 hover:shadow-2xl">
+      <button
+        type="button"
+        onClick={onOpenCart}
+        className="group fixed right-0 top-1/2 z-40 -translate-y-1/2 overflow-hidden rounded-l-2xl border border-slate-200 shadow-xl transition-all duration-300 hover:shadow-2xl"
+      >
         <div className="flex flex-col items-center justify-center bg-[#5E7F85] px-3 py-3 text-white">
           <div className="mt-1 text-[11px] font-semibold">{bagCount} ITEMS</div>
         </div>
-        <div className="border-t border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#5E7F85]">à§³ {bagTotal}</div>
-      </a>
+        <div className="border-t border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#5E7F85]">Tk {bagTotal}</div>
+      </button>
 
       <a
         href="https://m.me/yourpage"
@@ -78,15 +94,17 @@ export default function HomeFloatingCart({
       <div className={`fixed right-0 top-0 z-50 h-full w-[440px] bg-white shadow-2xl transition-transform duration-300 ease-out md:w-[460px] ${isCartOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="relative border-b border-slate-200 px-5 py-5">
           <div className="text-center text-[1.05rem] font-semibold tracking-[0.2em] text-slate-800">BAG</div>
-          <button onClick={onCloseCart} className="absolute right-4 top-1/2 -translate-y-1/2 text-xl text-slate-500 transition hover:text-slate-800">âœ•</button>
+          <button onClick={onCloseCart} className="absolute right-4 top-1/2 -translate-y-1/2 text-xl text-slate-500 transition hover:text-slate-800">×</button>
         </div>
 
         <div className="space-y-4 p-4 pb-28">
           {cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="mb-6 text-6xl text-slate-400">ðŸ‘œ</div>
+              <div className="mb-6 text-6xl text-slate-400">👜</div>
               <div className="text-lg font-medium text-slate-600">Your Shopping Bag is Empty</div>
-              <button onClick={onCloseCart} className="mt-6 rounded-xl bg-black px-6 py-3 text-sm font-semibold text-white">START SHOPPING</button>
+              <Link href="/products" onClick={onCloseCart} className="mt-6 rounded-xl bg-black px-6 py-3 text-sm font-semibold text-white">
+                START SHOPPING
+              </Link>
             </div>
           ) : (
             cartItems.map((item) => (
@@ -101,21 +119,21 @@ export default function HomeFloatingCart({
                         <div className="line-clamp-2 text-[15px] font-semibold leading-5 text-slate-800">{item.name}</div>
                         {item.badge ? <div className="mt-2 inline-flex rounded-full bg-[#eef4f4] px-2.5 py-1 text-[10px] font-semibold text-[#5E7F85]">{item.badge}</div> : null}
                       </div>
-                      <button onClick={() => onRemoveCartItem(item.name)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:border-[#5E7F85] hover:text-[#5E7F85]" aria-label="Remove item" title="Remove">Ã—</button>
+                      <button onClick={() => onRemoveCartItem(item.name)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:border-[#5E7F85] hover:text-[#5E7F85]" aria-label="Remove item" title="Remove">×</button>
                     </div>
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 text-[13px]">
-                        {item.oldPrice ? <span className="text-slate-400 line-through">à§³ {item.oldPrice}</span> : null}
-                        <span className="font-semibold text-slate-800">à§³ {item.price}</span>
+                        {item.oldPrice ? <span className="text-slate-400 line-through">Tk {item.oldPrice}</span> : null}
+                        <span className="font-semibold text-slate-800">Tk {item.price}</span>
                       </div>
                       <div className="text-right">
                         <div className="text-[12px] text-slate-400">Total</div>
-                        <div className="text-[15px] font-bold text-[#5E7F85]">à§³ {(item.price * item.qty).toFixed(2)}</div>
+                        <div className="text-[15px] font-bold text-[#5E7F85]">Tk {(item.price * item.qty).toFixed(2)}</div>
                       </div>
                     </div>
                     <div className="mt-3 flex justify-end">
                       <div className="flex items-center overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm">
-                        <button onClick={() => onUpdateCartQty(item.name, -1)} className="flex h-9 w-9 items-center justify-center text-base font-semibold text-slate-600 transition hover:bg-slate-100">âˆ’</button>
+                        <button onClick={() => onUpdateCartQty(item.name, -1)} className="flex h-9 w-9 items-center justify-center text-base font-semibold text-slate-600 transition hover:bg-slate-100">−</button>
                         <div className="flex h-9 min-w-[40px] items-center justify-center border-x border-slate-200 text-sm font-semibold text-slate-800">{item.qty}</div>
                         <button onClick={() => onUpdateCartQty(item.name, 1)} className="flex h-9 w-9 items-center justify-center text-base font-semibold text-slate-600 transition hover:bg-slate-100">+</button>
                       </div>
@@ -130,7 +148,7 @@ export default function HomeFloatingCart({
         <div className="absolute bottom-0 left-0 w-full border-t border-slate-200 bg-white/95 p-5 backdrop-blur-sm">
           <div className="mb-3 flex items-center justify-between text-sm text-slate-500">
             <span>Subtotal</span>
-            <span className="text-[1.05rem] font-semibold text-slate-900">à§³ {bagTotal}</span>
+            <span className="text-[1.05rem] font-semibold text-slate-900">Tk {bagTotal}</span>
           </div>
           <button onClick={onCheckout} disabled={bagCount === 0} className={`w-full rounded-xl py-3 font-semibold text-white transition ${bagCount === 0 ? "cursor-not-allowed bg-slate-300" : "bg-[#5E7F85] hover:bg-[#4e6e73]"}`}>
             Checkout

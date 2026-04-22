@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
 
 type SiteHeaderProps = {
@@ -19,19 +21,20 @@ function SiteHeader({ title = "" }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-6">
-        <a href="/" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <img src="/logo.png" alt="BrandnBeauty" className="h-10 w-auto" />
-        </a>
+        </Link>
         <div className="text-sm text-slate-500">{title}</div>
-        <button className="rounded-full bg-[#5E7F85] px-5 py-2 text-sm font-semibold text-white shadow-sm">
+        <Link href="/cart" className="rounded-full bg-[#5E7F85] px-5 py-2 text-sm font-semibold text-white shadow-sm">
           Bag 2
-        </button>
+        </Link>
       </div>
     </header>
   );
 }
 
 export default function RealCheckoutPage() {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState("Dhaka");
   const [selectedThana, setSelectedThana] = useState("Mirpur");
@@ -588,8 +591,7 @@ export default function RealCheckoutPage() {
     setIsSubmitting(true);
 
     setTimeout(() => {
-      alert("Order placed successfully!");
-      window.location.href = "/thank-you";
+      router.push("/thankyou");
     }, 1200);
   };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 
 type BrandEntry = {
@@ -167,15 +168,15 @@ export default function SiteHeader({
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-6">
-        <a href="/" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <div className="flex h-10 items-center text-2xl font-bold tracking-tight text-[#5E7F85]">BrandnBeauty</div>
-        </a>
+        </Link>
 
         <div className="relative flex flex-1 items-center justify-center gap-6 px-8">
           <div className="group static hidden md:block">
-            <button className="relative text-sm font-medium text-slate-700 hover:text-[#5E7F85] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-0 after:bg-[#5E7F85] after:transition-all group-hover:after:w-full">
+            <Link href="/brands" className="relative text-sm font-medium text-slate-700 hover:text-[#5E7F85] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-0 after:bg-[#5E7F85] after:transition-all group-hover:after:w-full">
               Brands
-            </button>
+            </Link>
 
             <div className="invisible absolute left-1/2 top-full z-50 mt-4 w-[min(1120px,calc(100vw-32px))] -translate-x-1/2 rounded-[1.75rem] border border-slate-200 bg-white opacity-0 shadow-[0_28px_80px_rgba(15,23,42,0.14)] transition-all duration-200 ease-out group-hover:visible group-hover:opacity-100">
               <div className="pointer-events-none absolute inset-x-0 -top-3 h-3" />

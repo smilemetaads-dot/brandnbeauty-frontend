@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 
 const PREVIEW_PAGE: PLPMode = "products";
@@ -290,6 +291,10 @@ function toSlug(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+function buildProductHref(productName: string): string {
+  return `/product?product=${encodeURIComponent(toSlug(productName))}`;
+}
+
 function fromSlug<T extends string>(
   slug: string | null,
   options: readonly T[],
@@ -405,10 +410,11 @@ function ProductCard({ product }: { product: Product }) {
     numericOldPrice > numericPrice
       ? Math.round(((numericOldPrice - numericPrice) / numericOldPrice) * 100)
       : 0;
+  const productHref = buildProductHref(product.name);
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
-      <div className="relative flex flex-1 flex-col">
+      <Link href={productHref} className="relative flex flex-1 flex-col">
         <div className="group relative aspect-[1/0.88] overflow-hidden bg-[#f1f1f1]">
           {discount > 0 ? (
             <div className="absolute left-0 top-0 z-10 rounded-br-2xl rounded-tl-[1.8rem] bg-[#6f8f95] px-3 py-2 text-[0.95rem] font-bold leading-none text-white shadow-sm">
@@ -457,11 +463,11 @@ function ProductCard({ product }: { product: Product }) {
             ))}
           </div>
         </div>
-      </div>
+      </Link>
 
-      <button className="w-full bg-[#6f8f95] px-5 py-4 text-[1.12rem] font-semibold text-white transition duration-200 hover:bg-[#5E7F85] active:scale-[0.99]">
+      <Link href={productHref} className="w-full bg-[#6f8f95] px-5 py-4 text-center text-[1.12rem] font-semibold text-white transition duration-200 hover:bg-[#5E7F85] active:scale-[0.99]">
         Add to Cart
-      </button>
+      </Link>
     </div>
   );
 }
@@ -719,13 +725,13 @@ function MasterPLPPreview({
 
       <section className="mx-auto max-w-[1480px] px-6 py-8">
         {mode === "category" ? (
-          <a href="/offers" className="mb-6 block overflow-hidden rounded-2xl">
+          <Link href="/category?category=offers" className="mb-6 block overflow-hidden rounded-2xl">
             <img
               src={currentBanner}
               alt={`${currentCategory} Banner`}
               className="h-[140px] w-full object-cover transition duration-300 hover:scale-[1.01]"
             />
-          </a>
+          </Link>
         ) : null}
 
         <div className="grid gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">

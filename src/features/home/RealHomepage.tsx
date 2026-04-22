@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import SiteHeader from "@/components/layout/SiteHeader";
 import HomeBestSellers from "@/features/home/HomeBestSellers";
@@ -24,6 +25,7 @@ type ProductCard = {
 };
 
 export default function BrandnBeautyWebsite() {
+  const router = useRouter();
   const products: ProductCard[] = [
     { name: "Acne Balance Facewash", price: "৳890", rating: "4.8", image: "/products/acne-balance-facewash.jpg", bestSeller: true },
     { name: "Barrier Calm Serum", price: "৳990", rating: "4.9", image: "/products/barrier-calm-serum.jpg", bestSeller: true },
@@ -87,33 +89,33 @@ export default function BrandnBeautyWebsite() {
 
   const handleCheckout = () => {
     if (bagCount === 0) return;
-    window.location.href = "/checkout";
+    router.push("/checkout");
   };
 
   const goToBrandPage = (brandName: string) => {
-    window.location.href = `/brands?brand=${encodeURIComponent(brandName)}`;
+    router.push(`/brands?brand=${encodeURIComponent(brandName)}`);
   };
 
   const goToBrandLetter = (letter: string) => {
-    window.location.href = `/brands?letter=${encodeURIComponent(letter)}`;
+    router.push(`/brands?letter=${encodeURIComponent(letter)}`);
   };
 
   const goToCategoryPage = (categoryName: string, subcategoryName?: string) => {
     const params = new URLSearchParams();
     params.set("category", categoryName);
     if (subcategoryName) params.set("subcategory", subcategoryName);
-    window.location.href = `/products?${params.toString()}`;
+    router.push(`/category?${params.toString()}`);
   };
 
   const goToCollectionPage = (collectionLink: string) => {
-    window.location.href = collectionLink;
+    router.push(collectionLink);
   };
 
   const slugifyProduct = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
   const goToProductDetails = (product: ProductCard) => {
     const productSlug = product.slug || slugifyProduct(product.name);
-    window.location.href = `/product/${productSlug}`;
+    router.push(`/product?product=${encodeURIComponent(productSlug)}`);
   };
 
   useEffect(() => {
@@ -177,7 +179,7 @@ export default function BrandnBeautyWebsite() {
 
       <HomeConcerns
         onGoToConcernPage={(concern) => {
-          window.location.href = `/products?concern=${encodeURIComponent(concern)}`;
+          router.push(`/concern?concern=${encodeURIComponent(concern)}`);
         }}
       />
 

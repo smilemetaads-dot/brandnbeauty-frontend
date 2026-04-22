@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 
 const PREVIEW_PAGE = "cart";
@@ -492,6 +494,7 @@ export function CartPagePreview({
 }: {
   setCurrentPage: (page: PreviewPage) => void;
 }) {
+  const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([
     { name: "Acne Balance Facewash", brand: "Some By Mi", price: 890, qty: 1 },
     { name: "Barrier Calm Serum", brand: "BrandnBeauty", price: 990, qty: 1 },
@@ -518,9 +521,9 @@ export function CartPagePreview({
       <div className="min-h-screen bg-stone-50 text-slate-900">
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-6">
-            <a href="/" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <img src="/logo.png" alt="BrandnBeauty" className="h-10 w-auto" />
-            </a>
+            </Link>
             <div className="text-sm text-slate-500">Shopping Bag ({items.length})</div>
           </div>
         </header>
@@ -536,7 +539,7 @@ export function CartPagePreview({
           </p>
           <button
             type="button"
-            onClick={() => setCurrentPage("category")}
+            onClick={() => router.push("/products")}
             className="mt-6 rounded-2xl bg-[#5E7F85] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
           >
             Start Shopping
@@ -550,9 +553,9 @@ export function CartPagePreview({
     <div className="min-h-screen bg-stone-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-6">
-          <a href="/" className="flex items-center">
+          <Link href="/" className="flex items-center">
             <img src="/logo.png" alt="BrandnBeauty" className="h-10 w-auto" />
-          </a>
+          </Link>
           <div className="text-sm text-slate-500">Shopping Bag ({items.length})</div>
         </div>
       </header>
@@ -655,6 +658,7 @@ export function CartPagePreview({
 
             <button
               type="button"
+              onClick={() => router.push("/checkout")}
               disabled={items.length === 0}
               className="mt-6 w-full rounded-2xl bg-[#5E7F85] py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -662,7 +666,7 @@ export function CartPagePreview({
             </button>
             <button
               type="button"
-              onClick={() => setCurrentPage("category")}
+              onClick={() => router.push("/products")}
               className="mt-3 w-full rounded-2xl border border-slate-300 py-3 text-sm font-semibold hover:bg-stone-50"
             >
               Continue Shopping

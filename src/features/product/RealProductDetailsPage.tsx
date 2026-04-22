@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 declare global {
@@ -32,6 +34,7 @@ type BoughtTogetherItem = {
 };
 
 export default function RealProductDetailsPage() {
+  const router = useRouter();
   const [selectedSize, setSelectedSize] = React.useState("100ml");
   const [activeInfoTab, setActiveInfoTab] = React.useState("description");
   const [quantity, setQuantity] = React.useState(1);
@@ -165,12 +168,12 @@ export default function RealProductDetailsPage() {
 
   const handleAddToCart = () => {
     if (mainAddedToCart) {
-      showMessage("Opening cart");
+      router.push("/cart");
       return;
     }
     setBagCount((c) => c + quantity);
     setMainAddedToCart(true);
-    showMessage(`${quantity} item added to cart`);
+    router.push("/cart");
   };
 
   const PAGE_USERNAME = "yourpageusername";
@@ -195,13 +198,13 @@ export default function RealProductDetailsPage() {
 
   const handleAddBundleToCart = () => {
     if (fbBundleAdded) {
-      showMessage("Opening cart");
+      router.push("/cart");
       return;
     }
 
     setBagCount((c) => c + frequentlyBought.length);
     setFbBundleAdded(true);
-    showMessage(`${frequentlyBought.length} bundle items added to cart`);
+    router.push("/cart");
   };
 
   const handleToggleRoutine = (index: number) => {
@@ -215,7 +218,7 @@ export default function RealProductDetailsPage() {
     const selectedItems = routineUpsell.filter((item) => item.selected);
 
     if (routineBundleAdded) {
-      showMessage("Opening cart");
+      router.push("/cart");
       return;
     }
 
@@ -226,17 +229,17 @@ export default function RealProductDetailsPage() {
 
     setBagCount((c) => c + selectedItems.length);
     setRoutineBundleAdded(true);
-    showMessage(`${selectedItems.length} routine items added to cart`);
+    router.push("/cart");
   };
 
   const handleRecommendationAddToCart = (key: string, productName: string) => {
     if (addedRecommendationKeys[key]) {
-      showMessage("Opening cart");
+      router.push("/cart");
       return;
     }
     setBagCount((c) => c + 1);
     setAddedRecommendationKeys((prev) => ({ ...prev, [key]: true }));
-    showMessage(`${productName} added to cart`);
+    router.push("/cart");
   };
 
   const goToPrevImage = () => {
@@ -270,7 +273,9 @@ export default function RealProductDetailsPage() {
     <div className="min-h-screen bg-stone-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-6">
-          <div className="text-2xl font-bold tracking-tight text-slate-900">BrandnBeauty</div>
+          <Link href="/" className="text-2xl font-bold tracking-tight text-slate-900">
+            BrandnBeauty
+          </Link>
           <div className="hidden w-full max-w-xl items-center gap-3 rounded-full border border-[#c9d5d8] bg-stone-50 px-5 py-2 shadow-sm md:flex">
             <span className="text-slate-400">⌕</span>
             <input
@@ -278,7 +283,10 @@ export default function RealProductDetailsPage() {
               placeholder="Search products..."
             />
           </div>
-          <button className="rounded-full bg-[#5E7F85] px-5 py-2 text-sm font-semibold text-white shadow-sm">
+          <button
+            onClick={() => router.push("/cart")}
+            className="rounded-full bg-[#5E7F85] px-5 py-2 text-sm font-semibold text-white shadow-sm"
+          >
             Bag {bagCount}
           </button>
         </div>
@@ -559,14 +567,14 @@ export default function RealProductDetailsPage() {
               <div className="flex items-center gap-2">
                 <span className="text-slate-500">Category:</span>
                 <button
-                  onClick={() => showMessage("Opening Skincare category products")}
+                  onClick={() => router.push("/category?category=skincare")}
                   className="font-semibold text-[#5E7F85]"
                 >
                   Skincare
                 </button>
                 <span className="text-slate-400">,</span>
                 <button
-                  onClick={() => showMessage("Opening Cleanser category products")}
+                  onClick={() => router.push("/category?category=skincare&subcategory=cleanser")}
                   className="font-semibold text-[#5E7F85]"
                 >
                   Cleanser
@@ -577,16 +585,16 @@ export default function RealProductDetailsPage() {
                 <span className="pt-1 text-slate-500">Tags:</span>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: "Acne Care", message: "Opening Acne Care products" },
-                    { label: "Oil Control", message: "Opening Oil Control products" },
+                    { label: "Acne Care", href: "/concern?concern=acne" },
+                    { label: "Oil Control", href: "/concern?concern=oily-skin" },
                     {
                       label: "Daily Cleanser",
-                      message: "Opening Daily Cleanser products",
+                      href: "/category?category=skincare&subcategory=cleanser",
                     },
                   ].map((tag) => (
                     <button
                       key={tag.label}
-                      onClick={() => showMessage(tag.message)}
+                      onClick={() => router.push(tag.href)}
                       className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-slate-600"
                     >
                       {tag.label}
@@ -598,7 +606,7 @@ export default function RealProductDetailsPage() {
               <div className="flex items-center gap-2">
                 <span className="text-slate-500">Brand:</span>
                 <button
-                  onClick={() => showMessage("Opening LUX brand products")}
+                  onClick={() => router.push("/brands")}
                   className="font-semibold text-[#5E7F85]"
                 >
                   LUX
