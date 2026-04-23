@@ -1,5 +1,6 @@
 "use client";
 
+import type { ProductRecord } from "@/lib/types/product";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -81,206 +82,45 @@ const CATEGORY_BANNER_MAP: Record<string, string> = {
   "Combo Deals": "/banners/category-combo-deals.jpg",
 };
 
-const PRODUCTS: Product[] = [
-  {
-    name: "Acne Balance Facewash",
-    brand: "Some By Mi",
-    category: "Skincare",
-    concerns: ["Acne", "Oily Skin"],
-    subcategory: "Cleanser",
-    freeDelivery: true,
-    bestSeller: true,
-    price: "৳ 890.00",
-    oldPrice: "৳ 1,150.00",
-    badge: "SALE",
-    rating: 4.5,
-  },
-  {
-    name: "Barrier Calm Serum",
-    brand: "BrandnBeauty",
-    category: "Skincare",
-    concerns: ["Sensitive Skin", "Acne"],
-    subcategory: "Serum",
-    freeDelivery: true,
-    bestSeller: true,
-    price: "৳ 990.00",
-    oldPrice: "৳ 1,250.00",
-    badge: "FREE SHIPPING",
-    rating: 4.0,
-  },
-  {
-    name: "Hydra Gel Moisturizer",
-    brand: "Simple",
-    category: "Skincare",
-    concerns: ["Dry Skin", "Sensitive Skin"],
-    subcategory: "Moisturizer",
-    freeDelivery: false,
-    bestSeller: true,
-    price: "৳ 850.00",
-    oldPrice: "৳ 1,050.00",
-    badge: "SALE",
-    rating: 4.0,
-  },
-  {
-    name: "Daily Sun Gel",
-    brand: "Beauty of Joseon",
-    category: "Skincare",
-    concerns: ["Acne", "Dark Spots"],
-    subcategory: "Sunscreen",
-    freeDelivery: true,
-    bestSeller: true,
-    price: "৳ 1,250.00",
-    oldPrice: "৳ 1,550.00",
-    badge: "SALE",
-    rating: 4.5,
-  },
-  {
-    name: "Glow Support Cleanser",
-    brand: "Beauty of Joseon",
-    category: "Skincare",
-    concerns: ["Brightening", "Dull Skin"],
-    subcategory: "Cleanser",
-    freeDelivery: true,
-    bestSeller: false,
-    price: "৳ 1,150.00",
-    oldPrice: "৳ 1,450.00",
-    badge: "FREE SHIPPING",
-    rating: 4.0,
-  },
-  {
-    name: "Night Repair Cream",
-    brand: "BrandnBeauty",
-    category: "Skincare",
-    concerns: ["Dry Skin", "Dull Skin"],
-    subcategory: "Moisturizer",
+function formatCurrency(value: number | null): string {
+  if (value === null) {
+    return "";
+  }
+
+  return `\u09F3 ${value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function mapProductRecordToCard(product: ProductRecord): Product {
+  const category = normalizeFilterValue(product.category, AVAILABLE_CATEGORIES);
+  const concern = normalizeFilterValue(product.concern, AVAILABLE_CONCERNS);
+
+  return {
+    name: product.name,
+    brand: product.brand,
+    category,
+    concerns: [concern],
+    subcategory: inferSubcategory(product),
     freeDelivery: false,
     bestSeller: false,
-    price: "৳ 1,180.00",
-    oldPrice: "৳ 1,500.00",
-    badge: "SALE",
-    rating: 4.5,
-  },
-  {
-    name: "Brightening Serum",
-    brand: "The Ordinary",
-    category: "Skincare",
-    concerns: ["Brightening", "Dark Spots"],
-    subcategory: "Serum",
-    freeDelivery: false,
-    bestSeller: false,
-    price: "৳ 1,350.00",
-    oldPrice: "৳ 1,700.00",
-    badge: "SALE",
-    rating: 3.5,
-  },
-  {
-    name: "Pore Clay Mask",
-    brand: "COSRX",
-    category: "Skincare",
-    concerns: ["Acne", "Oily Skin"],
-    subcategory: "Masks",
-    freeDelivery: false,
-    bestSeller: true,
-    price: "৳ 1,050.00",
-    oldPrice: "৳ 1,300.00",
+    price: formatCurrency(product.price),
+    oldPrice: formatCurrency(product.oldPrice),
     badge: "",
-    rating: 4.0,
-  },
-  {
-    name: "Vitamin C Booster",
-    brand: "Simple",
-    category: "Skincare",
-    concerns: ["Brightening", "Dark Spots"],
-    subcategory: "Serum",
-    freeDelivery: true,
-    bestSeller: false,
-    price: "৳ 950.00",
-    oldPrice: "৳ 1,200.00",
-    badge: "FREE SHIPPING",
-    rating: 3.5,
-  },
-  {
-    name: "Gentle Foam Cleanser",
-    brand: "COSRX",
-    category: "Skincare",
-    concerns: ["Sensitive Skin", "Acne"],
-    subcategory: "Cleanser",
-    freeDelivery: false,
-    bestSeller: true,
-    price: "৳ 1,020.00",
-    oldPrice: "৳ 1,280.00",
-    badge: "SALE",
-    rating: 4.0,
-  },
-  {
-    name: "Repair Sleeping Mask",
-    brand: "Laneige",
-    category: "Skincare",
-    concerns: ["Dry Skin", "Dull Skin"],
-    subcategory: "Masks",
-    freeDelivery: true,
-    bestSeller: false,
-    price: "৳ 1,450.00",
-    oldPrice: "৳ 1,850.00",
-    badge: "SALE",
     rating: 4.5,
-  },
-  {
-    name: "Daily Moisture Lotion",
-    brand: "CeraVe",
-    category: "Skincare",
-    concerns: ["Dry Skin", "Sensitive Skin"],
-    subcategory: "Moisturizer",
-    freeDelivery: true,
-    bestSeller: false,
-    price: "৳ 1,200.00",
-    oldPrice: "৳ 1,480.00",
-    badge: "",
-    rating: 4.0,
-  },
-  {
-    name: "Scalp Balance Shampoo",
-    brand: "L'Oréal",
-    category: "Hair Care",
-    concerns: ["Hairfall"],
-    subcategory: "Cleanser",
-    freeDelivery: false,
-    bestSeller: true,
-    price: "৳ 780.00",
-    oldPrice: "৳ 990.00",
-    badge: "SALE",
-    rating: 4.2,
-  },
-  {
-    name: "Body Glow Lotion",
-    brand: "CeraVe",
-    category: "Body Care",
-    concerns: ["Dry Skin"],
-    subcategory: "Moisturizer",
-    freeDelivery: true,
-    bestSeller: false,
-    price: "৳ 1,290.00",
-    oldPrice: "৳ 1,550.00",
-    badge: "",
-    rating: 4.4,
-  },
-  {
-    name: "Lip Tint Duo",
-    brand: "BrandnBeauty",
-    category: "Makeup",
-    concerns: ["Dull Skin"],
-    subcategory: "Serum",
-    freeDelivery: false,
-    bestSeller: true,
-    price: "৳ 690.00",
-    oldPrice: "৳ 890.00",
-    badge: "SALE",
-    rating: 4.1,
-  },
-];
+  };
+}
+
+function buildProducts(sourceProducts: ProductRecord[]): Product[] {
+  return sourceProducts
+    .filter((product) => product.status !== "draft")
+    .map((product) => mapProductRecordToCard(product));
+}
 
 function getNumericPrice(price: string): number {
-  return Number(String(price).replace(/[^0-9]/g, "")) / 100;
+  const normalizedPrice = Number(String(price).replace(/[^0-9.]/g, ""));
+  return Number.isFinite(normalizedPrice) ? normalizedPrice : 0;
 }
 
 function toSlug(value: string): string {
@@ -303,6 +143,58 @@ function fromSlug<T extends string>(
   if (!slug) return fallback;
   const match = options.find((item) => toSlug(item) === slug);
   return match || fallback;
+}
+
+function normalizeFilterValue<T extends string>(
+  value: string,
+  options: readonly T[],
+): string {
+  const normalizedValue = toSlug(value);
+  const compactValue = normalizedValue.replace(/-/g, "");
+  const option = options.find((item) => {
+    const normalizedOption = toSlug(item);
+    return (
+      normalizedOption === normalizedValue ||
+      normalizedOption.replace(/-/g, "") === compactValue
+    );
+  });
+
+  if (option) {
+    return option;
+  }
+
+  return value || "General";
+}
+
+function inferSubcategory(product: ProductRecord): string {
+  const searchableText = `${product.name} ${product.slug} ${product.category}`
+    .toLowerCase();
+
+  if (searchableText.includes("serum")) {
+    return "Serum";
+  }
+
+  if (searchableText.includes("face-wash") || searchableText.includes("face wash")) {
+    return "Cleanser";
+  }
+
+  if (searchableText.includes("cleanser")) {
+    return "Cleanser";
+  }
+
+  if (searchableText.includes("sunscreen") || searchableText.includes("sun")) {
+    return "Sunscreen";
+  }
+
+  if (searchableText.includes("moisturizer")) {
+    return "Moisturizer";
+  }
+
+  if (searchableText.includes("mask")) {
+    return "Masks";
+  }
+
+  return "All";
 }
 
 function parseBrandList(value: string | null, options: readonly string[]): string[] {
@@ -390,14 +282,35 @@ function runTests() {
 
 runTests();
 
-export default function RealProductsPage() {
+export default function RealProductsPage({
+  initialProducts,
+}: {
+  initialProducts?: ProductRecord[];
+}) {
+  const products = useMemo(
+    () => buildProducts(initialProducts ?? []),
+    [initialProducts],
+  );
+
   if (PREVIEW_PAGE === "category") {
-    return <MasterPLPPreview mode="category" presetCategory={PRESET_CATEGORY} />;
+    return (
+      <MasterPLPPreview
+        mode="category"
+        presetCategory={PRESET_CATEGORY}
+        products={products}
+      />
+    );
   }
   if (PREVIEW_PAGE === "concern") {
-    return <MasterPLPPreview mode="concern" presetConcern={PRESET_CONCERN} />;
+    return (
+      <MasterPLPPreview
+        mode="concern"
+        presetConcern={PRESET_CONCERN}
+        products={products}
+      />
+    );
   }
-  return <MasterPLPPreview mode="products" />;
+  return <MasterPLPPreview mode="products" products={products} />;
 }
 
 function ProductCard({ product }: { product: Product }) {
@@ -476,13 +389,16 @@ function MasterPLPPreview({
   mode,
   presetCategory,
   presetConcern,
+  products,
 }: {
   mode: PLPMode;
   presetCategory?: string;
   presetConcern?: string;
+  products: Product[];
 }) {
-  const minAvailablePrice = Math.min(...PRODUCTS.map((p) => getNumericPrice(p.price)));
-  const maxAvailablePrice = Math.max(...PRODUCTS.map((p) => getNumericPrice(p.price)));
+  const productPrices = products.map((p) => getNumericPrice(p.price));
+  const minAvailablePrice = productPrices.length ? Math.min(...productPrices) : 0;
+  const maxAvailablePrice = productPrices.length ? Math.max(...productPrices) : 0;
 
   const [currentCategory, setCurrentCategory] = useState<string>(presetCategory || "All");
   const [expandedCategory, setExpandedCategory] = useState<string | null>(
@@ -495,6 +411,8 @@ function MasterPLPPreview({
   const [selectedBestSeller, setSelectedBestSeller] = useState(false);
   const [maxPrice, setMaxPrice] = useState<number>(maxAvailablePrice);
   const [brandSearch, setBrandSearch] = useState("");
+  const effectiveMaxPrice =
+    maxPrice > 0 || maxAvailablePrice === 0 ? maxPrice : maxAvailablePrice;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -522,17 +440,38 @@ function MasterPLPPreview({
       const resolvedPrice = params.get("price")
         ? Number(params.get("price"))
         : maxAvailablePrice;
+      const safeCategory =
+        resolvedCategory === "All" ||
+        products.some((product) => product.category === resolvedCategory)
+          ? resolvedCategory
+          : "All";
+      const safeConcern =
+        resolvedConcern === "All" ||
+        products.some((product) => product.concerns.includes(resolvedConcern))
+          ? resolvedConcern
+          : "All";
+      const safeSubcategory =
+        resolvedSubcategory === "All" ||
+        products.some((product) => product.subcategory === resolvedSubcategory)
+          ? resolvedSubcategory
+          : "All";
+      const safeBrands = resolvedBrands.filter((brand) =>
+        products.some((product) => product.brand === brand),
+      );
 
-      setCurrentCategory(resolvedCategory);
-      setExpandedCategory(resolvedCategory !== "All" ? resolvedCategory : null);
-      setCurrentConcern(resolvedConcern);
-      setSelectedSubcategory(resolvedSubcategory);
-      setSelectedBrands(resolvedBrands);
+      setCurrentCategory(safeCategory);
+      setExpandedCategory(safeCategory !== "All" ? safeCategory : null);
+      setCurrentConcern(safeConcern);
+      setSelectedSubcategory(safeSubcategory);
+      setSelectedBrands(safeBrands);
       setSelectedFreeDelivery(params.get("free_delivery") === "1");
       setSelectedBestSeller(params.get("best_seller") === "1");
       setMaxPrice(
         Number.isFinite(resolvedPrice)
-          ? Math.min(Math.max(resolvedPrice, minAvailablePrice), maxAvailablePrice)
+          ? Math.min(
+              Math.max(resolvedPrice, minAvailablePrice),
+              maxAvailablePrice || resolvedPrice,
+            )
           : maxAvailablePrice
       );
     };
@@ -540,7 +479,14 @@ function MasterPLPPreview({
     applyURLFilters();
     window.addEventListener("popstate", applyURLFilters);
     return () => window.removeEventListener("popstate", applyURLFilters);
-  }, [mode, presetCategory, presetConcern, minAvailablePrice, maxAvailablePrice]);
+  }, [
+    mode,
+    presetCategory,
+    presetConcern,
+    minAvailablePrice,
+    maxAvailablePrice,
+    products,
+  ]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -551,7 +497,7 @@ function MasterPLPPreview({
       concern: currentConcern !== "All" ? currentConcern : null,
       subcategory: selectedSubcategory,
       brands: selectedBrands,
-      price: maxPrice,
+      price: effectiveMaxPrice,
       freeDelivery: selectedFreeDelivery,
       bestSeller: selectedBestSeller,
       maxAvailablePrice,
@@ -569,6 +515,7 @@ function MasterPLPPreview({
     selectedSubcategory,
     selectedBrands,
     maxPrice,
+    effectiveMaxPrice,
     selectedFreeDelivery,
     selectedBestSeller,
     maxAvailablePrice,
@@ -587,7 +534,7 @@ function MasterPLPPreview({
   }, [brandSearch, selectedBrands]);
 
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((product) => {
+    const filtered = products.filter((product) => {
       const numericPrice = getNumericPrice(product.price);
       const matchesCategory = currentCategory === "All" || product.category === currentCategory;
       const matchesConcern =
@@ -596,7 +543,9 @@ function MasterPLPPreview({
         selectedSubcategory === "All" || product.subcategory === selectedSubcategory;
       const matchesBrand =
         selectedBrands.length === 0 || selectedBrands.includes(product.brand);
-      const matchesPrice = numericPrice >= minAvailablePrice && numericPrice <= maxPrice;
+      const matchesPrice =
+        maxAvailablePrice === 0 ||
+        (numericPrice >= minAvailablePrice && numericPrice <= effectiveMaxPrice);
       const matchesFreeDelivery = !selectedFreeDelivery || product.freeDelivery;
       const matchesBestSeller = !selectedBestSeller || product.bestSeller;
 
@@ -610,15 +559,19 @@ function MasterPLPPreview({
         matchesBestSeller
       );
     });
+
+    return filtered;
   }, [
     currentCategory,
     currentConcern,
     selectedSubcategory,
     selectedBrands,
-    maxPrice,
     selectedFreeDelivery,
     selectedBestSeller,
     minAvailablePrice,
+    maxAvailablePrice,
+    effectiveMaxPrice,
+    products,
   ]);
 
   const currentBanner =
@@ -631,7 +584,7 @@ function MasterPLPPreview({
     selectedBrands.length > 0 ||
     selectedFreeDelivery ||
     selectedBestSeller ||
-    maxPrice !== maxAvailablePrice ||
+    effectiveMaxPrice !== maxAvailablePrice ||
     (mode === "products" && (currentCategory !== "All" || currentConcern !== "All"));
 
   const activeFilters: string[] = [];
@@ -642,7 +595,7 @@ function MasterPLPPreview({
   if (selectedBrands.length > 0) activeFilters.push(...selectedBrands);
   if (selectedFreeDelivery) activeFilters.push("Free Delivery");
   if (selectedBestSeller) activeFilters.push("Best Selling");
-  if (maxPrice !== maxAvailablePrice) activeFilters.push(`Up to ৳ ${maxPrice}`);
+  if (effectiveMaxPrice !== maxAvailablePrice) activeFilters.push(`Up to ৳ ${effectiveMaxPrice}`);
 
   const removeActiveFilter = (filter: string) => {
     if (filter === currentCategory) {
@@ -670,7 +623,7 @@ function MasterPLPPreview({
       setSelectedBestSeller(false);
       return;
     }
-    if (filter === `Up to ৳ ${maxPrice}`) {
+    if (filter === `Up to ৳ ${effectiveMaxPrice}`) {
       setMaxPrice(maxAvailablePrice);
     }
   };
@@ -690,20 +643,20 @@ function MasterPLPPreview({
   };
 
   const categoryCount = (category: string) =>
-    PRODUCTS.filter((p) => p.category === category).length;
+    products.filter((p) => p.category === category).length;
 
   const subcategoriesForCategory = (category: string) => {
     const set = new Set(
-      PRODUCTS.filter((p) => p.category === category).map((p) => p.subcategory)
+      products.filter((p) => p.category === category).map((p) => p.subcategory)
     );
     return [...AVAILABLE_SUBCATEGORIES].filter((item) => item !== "All" && set.has(item));
   };
 
   const concernCount = (category: string, concern: string) =>
-    PRODUCTS.filter((p) => p.category === category && p.concerns.includes(concern)).length;
+    products.filter((p) => p.category === category && p.concerns.includes(concern)).length;
 
   const subcategoryCount = (category: string, subcategory: string) =>
-    PRODUCTS.filter((p) => p.category === category && p.subcategory === subcategory).length;
+    products.filter((p) => p.category === category && p.subcategory === subcategory).length;
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] text-slate-900">
@@ -755,13 +708,13 @@ function MasterPLPPreview({
                   type="range"
                   min={minAvailablePrice}
                   max={maxAvailablePrice}
-                  value={maxPrice}
+                  value={effectiveMaxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
                   className="w-full accent-[#5E7F85]"
                 />
                 <div className="mt-3 flex items-center justify-between text-[1rem] text-[#23395b]">
                   <span>৳ {minAvailablePrice}</span>
-                  <span>৳ {maxPrice}</span>
+                  <span>৳ {effectiveMaxPrice}</span>
                 </div>
               </div>
             </div>
@@ -789,7 +742,7 @@ function MasterPLPPreview({
                     Free Delivery
                   </span>
                   <span className="shrink-0 rounded-full bg-[#f2f2f2] px-3 py-1 text-[0.92rem] text-[#6e81a3]">
-                    {PRODUCTS.filter((p) => p.freeDelivery).length}
+                    {products.filter((p) => p.freeDelivery).length}
                   </span>
                 </button>
 
@@ -810,7 +763,7 @@ function MasterPLPPreview({
                     Best Selling
                   </span>
                   <span className="shrink-0 rounded-full bg-[#f2f2f2] px-3 py-1 text-[0.92rem] text-[#6e81a3]">
-                    {PRODUCTS.filter((p) => p.bestSeller).length}
+                    {products.filter((p) => p.bestSeller).length}
                   </span>
                 </button>
               </div>
@@ -885,7 +838,7 @@ function MasterPLPPreview({
                                   : "bg-[#f2f2f2] text-[#6e81a3]"
                               }`}
                             >
-                              {PRODUCTS.filter((p) => p.concerns.includes(concern)).length}
+                              {products.filter((p) => p.concerns.includes(concern)).length}
                             </span>
                           </button>
                         );
@@ -985,7 +938,7 @@ function MasterPLPPreview({
                       {isExpanded ? (
                         <div className="ml-4 mt-1 space-y-1">
                           {AVAILABLE_CONCERNS.filter((concern) =>
-                            PRODUCTS.some(
+                            products.some(
                               (p) => p.category === item && p.concerns.includes(concern)
                             )
                           ).map((concern) => {

@@ -1,7 +1,9 @@
 "use client";
 
+import { mockProducts } from "@/lib/mock/products";
+import type { ProductRecord } from "@/lib/types/product";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 
 declare global {
@@ -33,9 +35,324 @@ type BoughtTogetherItem = {
   oldPrice: string;
 };
 
+type PDPContent = {
+  sourceId: ProductRecord["id"];
+  subcategory: string;
+  rating: number;
+  reviewCount: string;
+  soldCount: string;
+  urgencyText: string;
+  recentBuyText: string;
+  sizes: string[];
+  bestFor: string[];
+  tags: Array<{ label: string; href: string }>;
+  description: string;
+  tabDescription: string;
+  howToUse: string;
+  ingredients: string;
+  faq: Array<{ question: string; answer: string }>;
+};
+
+const DEFAULT_PRODUCT_ID = "prd_acne_balance_facewash";
+
+const PRODUCT_LOOKUP = new Map(mockProducts.map((product) => [product.id, product]));
+
+const PDP_CONTENT_BY_ID: Record<string, PDPContent> = {
+  prd_acne_balance_facewash: {
+    sourceId: "prd_acne_balance_facewash",
+    subcategory: "Cleanser",
+    rating: 4.8,
+    reviewCount: "128 reviews",
+    soldCount: "1.2k sold",
+    urgencyText: "Only 7 left",
+    recentBuyText: "327 people bought this in last 7 days",
+    sizes: ["100ml", "150ml"],
+    bestFor: [
+      "Oily & Acne-Prone Skin",
+      "Blackheads & Clogged Pores",
+      "Daily Gentle Cleansing",
+    ],
+    tags: [
+      { label: "Acne Care", href: "/concern?concern=acne" },
+      { label: "Oil Control", href: "/concern?concern=oily-skin" },
+      {
+        label: "Daily Cleanser",
+        href: "/category?category=skincare&subcategory=cleanser",
+      },
+    ],
+    description:
+      "A gentle acne-focused facewash designed to cleanse excess oil, dirt and buildup without leaving the skin feeling stripped. It helps maintain a balanced, fresh look while supporting a simple and effective daily skincare routine.",
+    tabDescription:
+      "This cleanser is designed for users who want a balanced daily wash experience for oily or acne-prone skin. It focuses on cleansing excess oil, dirt, and buildup while helping the routine stay simple and easy to follow. It fits well into a beginner-friendly skincare routine for daily use.",
+    howToUse:
+      "1. Wet your face with water. 2. Take a small amount and lather gently. 3. Massage for 20-30 seconds. 4. Rinse well and follow with serum or moisturizer.",
+    ingredients:
+      "Salicylic Acid, Niacinamide, Zinc PCA, Glycerin, and mild surfactant base with skin-supporting ingredients.",
+    faq: [
+      {
+        question: "Is this suitable for daily use?",
+        answer: "Yes, it is gentle enough to be used twice daily.",
+      },
+      {
+        question: "Can it help with acne?",
+        answer: "It helps control excess oil and supports acne-prone skin care routine.",
+      },
+      {
+        question: "Will it dry out my skin?",
+        answer: "No, it is designed to cleanse without stripping natural moisture.",
+      },
+    ],
+  },
+  prd_barrier_calm_serum: {
+    sourceId: "prd_barrier_calm_serum",
+    subcategory: "Serum",
+    rating: 4.9,
+    reviewCount: "94 reviews",
+    soldCount: "860 sold",
+    urgencyText: "Popular choice",
+    recentBuyText: "214 people bought this in last 7 days",
+    sizes: ["30ml"],
+    bestFor: ["Sensitive Skin", "Barrier Support", "Daily Calming Care"],
+    tags: [
+      { label: "Sensitive Skin", href: "/concern?concern=sensitive-skin" },
+      { label: "Barrier Care", href: "/concern?concern=sensitive-skin" },
+      { label: "Daily Serum", href: "/category?category=skincare&subcategory=serum" },
+    ],
+    description:
+      "A barrier-support serum made for calming stressed skin and fitting easily into a daily routine. It is a simple serum choice for users who want hydration and comfort without making the routine feel heavy.",
+    tabDescription:
+      "This serum is built for people who want a calming, barrier-supporting step in their routine. It works well for sensitive or stressed skin and fits neatly into both beginner and daily skincare routines.",
+    howToUse:
+      "1. Apply after cleansing. 2. Use a small amount on slightly damp skin. 3. Pat gently until absorbed. 4. Follow with moisturizer.",
+    ingredients:
+      "Barrier-supporting humectants, calming skin conditioners, lightweight hydration agents, and soothing daily-use ingredients.",
+    faq: [
+      {
+        question: "Can I use this every day?",
+        answer: "Yes, it is designed for regular daily use.",
+      },
+      {
+        question: "Is this good for sensitive skin?",
+        answer: "Yes, the formula direction is intended for calming and barrier support.",
+      },
+      {
+        question: "When should I apply it?",
+        answer: "Use it after cleansing and before moisturizer.",
+      },
+    ],
+  },
+  prd_daily_sun_gel: {
+    sourceId: "prd_daily_sun_gel",
+    subcategory: "Sunscreen",
+    rating: 4.8,
+    reviewCount: "111 reviews",
+    soldCount: "880 sold",
+    urgencyText: "Only 11 left",
+    recentBuyText: "289 people bought this in last 7 days",
+    sizes: ["50ml"],
+    bestFor: ["Daily Sun Protection", "Comfortable Wear", "Routine Finishing Step"],
+    tags: [
+      { label: "Sun Care", href: "/concern?concern=dark-spots" },
+      { label: "Daily SPF", href: "/category?category=skincare&subcategory=sunscreen" },
+      { label: "Routine Essential", href: "/products?best-seller=true" },
+    ],
+    description:
+      "A lightweight everyday sunscreen gel created for comfortable daily wear and broad routine compatibility. It is designed for users who want protection that feels easy to reapply and layer.",
+    tabDescription:
+      "This sunscreen gel suits users who want a light final step in their morning skincare routine. It is designed to feel comfortable during daily wear and easy to pair with other skincare steps.",
+    howToUse:
+      "1. Apply as the final step of your morning routine. 2. Spread evenly over face and exposed skin. 3. Reapply when needed during the day.",
+    ingredients:
+      "UV filter blend, lightweight gel base, hydration-support ingredients, and skin-comfort agents for daily wear.",
+    faq: [
+      {
+        question: "Can I wear it every day?",
+        answer: "Yes, it is positioned as an everyday sunscreen step.",
+      },
+      {
+        question: "Does it work with makeup?",
+        answer: "It is intended to feel light enough for routine layering.",
+      },
+      {
+        question: "When should I apply it?",
+        answer: "Use it as the last step of your morning skincare routine.",
+      },
+    ],
+  },
+  prd_hydra_gel_moisturizer: {
+    sourceId: "prd_hydra_gel_moisturizer",
+    subcategory: "Moisturizer",
+    rating: 4.8,
+    reviewCount: "76 reviews",
+    soldCount: "710 sold",
+    urgencyText: "Fast-moving item",
+    recentBuyText: "173 people bought this in last 7 days",
+    sizes: ["50g"],
+    bestFor: ["Oily Skin", "Lightweight Hydration", "Daily Moisture Balance"],
+    tags: [
+      { label: "Oily Skin", href: "/concern?concern=oily-skin" },
+      { label: "Gel Moisturizer", href: "/category?category=skincare&subcategory=moisturizer" },
+      { label: "Hydration", href: "/products?best-seller=true" },
+    ],
+    description:
+      "A lightweight gel moisturizer that helps hydrate skin without leaving a heavy finish. It is designed for routines that need comfortable daily moisture support with a fresh skin feel.",
+    tabDescription:
+      "This moisturizer works well for people who want hydration without a rich or heavy texture. It fits naturally into simple morning and evening skincare routines.",
+    howToUse:
+      "1. Apply after serum. 2. Spread gently over face and neck. 3. Use morning and evening as needed.",
+    ingredients:
+      "Hydration-supporting humectants, lightweight emollients, and skin-balancing ingredients for comfortable daily moisture.",
+    faq: [
+      {
+        question: "Is this good for oily skin?",
+        answer: "Yes, it is positioned as a lightweight gel-style moisturizer.",
+      },
+      {
+        question: "Can I use it under sunscreen?",
+        answer: "Yes, it fits well into a daytime routine before sunscreen.",
+      },
+      {
+        question: "Does it feel heavy?",
+        answer: "No, the product direction is centered on a lightweight finish.",
+      },
+    ],
+  },
+  prd_pore_clay_mask: {
+    sourceId: "prd_pore_clay_mask",
+    subcategory: "Masks",
+    rating: 4.6,
+    reviewCount: "63 reviews",
+    soldCount: "420 sold",
+    urgencyText: "Only 9 left",
+    recentBuyText: "98 people bought this in last 7 days",
+    sizes: ["100g"],
+    bestFor: ["Pore Care", "Weekly Deep Clean", "Oily & Congested Skin"],
+    tags: [
+      { label: "Pores", href: "/concern?concern=acne" },
+      { label: "Weekly Care", href: "/category?category=skincare&subcategory=masks" },
+      { label: "Oil Control", href: "/concern?concern=oily-skin" },
+    ],
+    description:
+      "A pore-care clay mask built for weekly deep-clean support in oily and congested skin routines. It is best suited to users who want an occasional reset step alongside their daily routine.",
+    tabDescription:
+      "This mask is designed as a weekly or occasional treatment step for users focused on pores and congestion. It complements a daily cleanser and moisturizer routine without replacing them.",
+    howToUse:
+      "1. Apply to clean dry skin. 2. Leave on briefly as directed in your routine. 3. Rinse thoroughly and follow with hydration steps.",
+    ingredients:
+      "Clay-based cleansing agents, oil-absorbing support ingredients, and routine-friendly skin conditioners.",
+    faq: [
+      {
+        question: "Should I use this every day?",
+        answer: "No, this type of mask is better suited for occasional routine use.",
+      },
+      {
+        question: "Who is it best for?",
+        answer: "It is most aligned with pore-focused and oily-skin routines.",
+      },
+      {
+        question: "What should I use after it?",
+        answer: "Follow with hydrating and balancing skincare steps.",
+      },
+    ],
+  },
+};
+
+function formatBDT(value: number): string {
+  return `৳${value.toLocaleString("en-US")}`;
+}
+
+function parsePrice(price: string): number {
+  return Number(String(price).replace(/[^0-9]/g, ""));
+}
+
+function getProductStatusLabel(product: ProductRecord): string {
+  if (product.status === "out_of_stock") {
+    return "Out of Stock";
+  }
+
+  return "In Stock";
+}
+
+function getSharedProductBySlug(slug: string | null): ProductRecord | null {
+  if (!slug) {
+    return PRODUCT_LOOKUP.get(DEFAULT_PRODUCT_ID) ?? null;
+  }
+
+  return (
+    mockProducts.find((product) => product.slug === slug) ??
+    PRODUCT_LOOKUP.get(DEFAULT_PRODUCT_ID) ??
+    null
+  );
+}
+
+function buildDefaultPDPContent(product: ProductRecord): PDPContent {
+  return {
+    sourceId: product.id,
+    subcategory: product.category,
+    rating: 4.8,
+    reviewCount: "128 reviews",
+    soldCount: "1.2k sold",
+    urgencyText: product.stock <= 12 ? `Only ${product.stock} left` : "Popular choice",
+    recentBuyText: "Customers are actively buying this product",
+    sizes: ["100ml"],
+    bestFor: [product.concern, `Daily ${product.category}`, "Simple routine support"],
+    tags: [
+      {
+        label: product.concern,
+        href: `/products?concern=${encodeURIComponent(product.concern.toLowerCase())}`,
+      },
+      {
+        label: product.category,
+        href: `/products?category=${encodeURIComponent(product.category.toLowerCase())}`,
+      },
+    ],
+    description: product.shortDescription,
+    tabDescription: product.shortDescription,
+    howToUse:
+      "Use as part of your regular routine and follow the product step that best matches your skin needs.",
+    ingredients:
+      "Ingredient information will be added with the next structured content pass.",
+    faq: [
+      {
+        question: "Is this suitable for regular use?",
+        answer: "Yes, it is intended to fit into a normal skincare routine.",
+      },
+    ],
+  };
+}
+
 export default function RealProductDetailsPage() {
+  const searchParams = useSearchParams();
+  const productSlug = searchParams.get("product");
+  const currentProduct = getSharedProductBySlug(productSlug);
+
+  if (!currentProduct) {
+    return null;
+  }
+
+  const currentContent =
+    PDP_CONTENT_BY_ID[currentProduct.id] ?? buildDefaultPDPContent(currentProduct);
+
+  return (
+    <RealProductDetailsContent
+      key={currentProduct.id}
+      currentProduct={currentProduct}
+      currentContent={currentContent}
+    />
+  );
+}
+
+function RealProductDetailsContent({
+  currentProduct,
+  currentContent,
+}: {
+  currentProduct: ProductRecord;
+  currentContent: PDPContent;
+}) {
   const router = useRouter();
-  const [selectedSize, setSelectedSize] = React.useState("100ml");
+  const availableSizes = currentContent.sizes;
+
+  const [selectedSize, setSelectedSize] = React.useState(availableSizes[0]);
   const [activeInfoTab, setActiveInfoTab] = React.useState("description");
   const [quantity, setQuantity] = React.useState(1);
   const [bagCount, setBagCount] = React.useState(0);
@@ -49,90 +366,135 @@ export default function RealProductDetailsPage() {
   >({});
   const [touchStartX, setTouchStartX] = React.useState<number | null>(null);
 
-  const thumbs = [
-    "/products/pdp-1.jpg",
-    "/products/pdp-2.jpg",
-    "/products/pdp-3.jpg",
-    "/products/pdp-4.jpg",
-  ];
+  const thumbs = React.useMemo(
+    () => [
+      currentProduct?.image ?? "/products/pdp-1.jpg",
+      "/products/pdp-2.jpg",
+      "/products/pdp-3.jpg",
+      "/products/pdp-4.jpg",
+    ],
+    [currentProduct?.image]
+  );
 
   const [activeImage, setActiveImage] = React.useState(thumbs[0]);
   const [isImageOpen, setIsImageOpen] = React.useState(false);
 
-  const related: RelatedProduct[] = [
-    {
-      name: "Barrier Calm Serum",
-      price: "৳990",
-      oldPrice: "৳1,190",
-      tag: "15% OFF",
-      badge: "SALE",
-      rating: 4.8,
-    },
-    {
-      name: "Hydra Gel Moisturizer",
-      price: "৳850",
-      oldPrice: "৳990",
-      tag: "12% OFF",
-      badge: "FREE SHIPPING",
-      rating: 4.7,
-    },
-    {
-      name: "Daily Sun Gel",
-      price: "৳1,250",
-      oldPrice: "৳1,450",
-      tag: "14% OFF",
-      badge: "SALE",
-      rating: 4.9,
-    },
-    {
-      name: "Pore Clay Mask",
-      price: "৳1,050",
-      oldPrice: "৳1,250",
-      tag: "16% OFF",
-      badge: "SALE",
-      rating: 4.6,
-    },
-  ];
+  const related: RelatedProduct[] = React.useMemo(
+    () =>
+      [
+        {
+          sourceId: "prd_barrier_calm_serum",
+          tag: "15% OFF",
+          badge: "SALE",
+          rating: 4.8,
+          oldPriceFallback: 1190,
+        },
+        {
+          sourceId: "prd_hydra_gel_moisturizer",
+          tag: "12% OFF",
+          badge: "FREE SHIPPING",
+          rating: 4.7,
+          oldPriceFallback: 990,
+        },
+        {
+          sourceId: "prd_daily_sun_gel",
+          tag: "14% OFF",
+          badge: "SALE",
+          rating: 4.9,
+          oldPriceFallback: 1450,
+        },
+        {
+          sourceId: "prd_pore_clay_mask",
+          tag: "16% OFF",
+          badge: "SALE",
+          rating: 4.6,
+          oldPriceFallback: 1250,
+        },
+      ].flatMap((config) => {
+        const product = PRODUCT_LOOKUP.get(config.sourceId);
 
-  const routineUpsellInitial: RoutineItem[] = [
-    {
-      step: "Step 1",
-      label: "Cleanser",
-      name: "Acne Balance Facewash",
-      price: "৳890",
-      selected: true,
-    },
-    {
-      step: "Step 2",
-      label: "Treat",
-      name: "Barrier Calm Serum",
-      price: "৳990",
-      selected: false,
-    },
-    {
-      step: "Step 3",
-      label: "Moisturize",
-      name: "Hydra Gel Moisturizer",
-      price: "৳850",
-      selected: false,
-    },
-    {
-      step: "Step 4",
-      label: "Protect",
-      name: "Daily Sun Gel",
-      price: "৳1,250",
-      selected: false,
-    },
-  ];
+        if (!product || product.id === currentProduct?.id) {
+          return [];
+        }
+
+        return [
+          {
+            name: product.name,
+            price: formatBDT(product.price),
+            oldPrice: formatBDT(product.oldPrice ?? config.oldPriceFallback),
+            tag: config.tag,
+            badge: config.badge,
+            rating: config.rating,
+          },
+        ];
+      }),
+    [currentProduct.id]
+  );
+
+  const routineUpsellInitial = React.useMemo<RoutineItem[]>(
+    () => [
+      {
+        step: "Step 1",
+        label: currentContent?.subcategory ?? currentProduct?.category ?? "Routine",
+        name: currentProduct?.name ?? "Acne Balance Facewash",
+        price: formatBDT(currentProduct?.price ?? 890),
+        selected: true,
+      },
+      {
+        step: "Step 2",
+        label: "Treat",
+        name: PRODUCT_LOOKUP.get("prd_barrier_calm_serum")?.name ?? "Barrier Calm Serum",
+        price: formatBDT(PRODUCT_LOOKUP.get("prd_barrier_calm_serum")?.price ?? 990),
+        selected: false,
+      },
+      {
+        step: "Step 3",
+        label: "Moisturize",
+        name:
+          PRODUCT_LOOKUP.get("prd_hydra_gel_moisturizer")?.name ??
+          "Hydra Gel Moisturizer",
+        price: formatBDT(PRODUCT_LOOKUP.get("prd_hydra_gel_moisturizer")?.price ?? 850),
+        selected: false,
+      },
+      {
+        step: "Step 4",
+        label: "Protect",
+        name: PRODUCT_LOOKUP.get("prd_daily_sun_gel")?.name ?? "Daily Sun Gel",
+        price: formatBDT(PRODUCT_LOOKUP.get("prd_daily_sun_gel")?.price ?? 1250),
+        selected: false,
+      },
+    ],
+    [
+      currentContent.subcategory,
+      currentProduct.category,
+      currentProduct.name,
+      currentProduct.price,
+    ]
+  );
 
   const [routineUpsell, setRoutineUpsell] = React.useState<RoutineItem[]>(
     routineUpsellInitial
   );
 
-  const frequentlyBought: BoughtTogetherItem[] = [
-    { name: "Barrier Calm Serum", price: "৳990", oldPrice: "৳1,190" },
-    { name: "Daily Sun Gel", price: "৳1,250", oldPrice: "৳1,450" },
-  ];
+  const frequentlyBought: BoughtTogetherItem[] = React.useMemo(
+    () =>
+      ["prd_barrier_calm_serum", "prd_daily_sun_gel"].flatMap((id) => {
+        const product = PRODUCT_LOOKUP.get(id);
+
+        if (!product) {
+          return [];
+        }
+
+        return [
+          {
+            name: product.name,
+            price: formatBDT(product.price),
+            oldPrice: formatBDT(product.oldPrice ?? product.price + 200),
+          },
+        ];
+      }),
+    []
+  );
 
   const recommendationTitles = [
     "Similar Products",
@@ -141,16 +503,12 @@ export default function RealProductDetailsPage() {
   ];
   const recommendationProducts = [...related, ...related].slice(0, 8);
 
-  const parsePrice = (p: string) => Number(String(p).replace(/[^0-9]/g, ""));
-  const formatBDT = (n: number) => `৳${n.toLocaleString()}`;
-
   const fbTotal = frequentlyBought.reduce((sum, item) => sum + parsePrice(item.price), 0);
   const fbOldTotal = frequentlyBought.reduce(
     (sum, item) => sum + parsePrice(item.oldPrice),
     0
   );
   const fbSavings = fbOldTotal - fbTotal;
-
   const activeImageIndex = thumbs.indexOf(activeImage);
 
   const showMessage = (message: string) => {
@@ -180,7 +538,7 @@ export default function RealProductDetailsPage() {
 
   const handleMessengerOrder = () => {
     const message = encodeURIComponent(
-      `I want to order Acne Balance Facewash (${selectedSize})`
+      `I want to order ${currentProduct?.name ?? "this product"} (${selectedSize})`
     );
     const url = `https://m.me/${PAGE_USERNAME}?ref=${message}`;
     if (typeof window !== "undefined") {
@@ -232,7 +590,7 @@ export default function RealProductDetailsPage() {
     router.push("/cart");
   };
 
-  const handleRecommendationAddToCart = (key: string, productName: string) => {
+  const handleRecommendationAddToCart = (key: string) => {
     if (addedRecommendationKeys[key]) {
       router.push("/cart");
       return;
@@ -268,6 +626,12 @@ export default function RealProductDetailsPage() {
     }
     setTouchStartX(null);
   };
+
+  const oldPriceValue = currentProduct.oldPrice ?? currentProduct.price + 160;
+  const currentPrice = formatBDT(currentProduct.price);
+  const currentOldPrice = formatBDT(oldPriceValue);
+  const currentSavings = oldPriceValue - currentProduct.price;
+  const currentDiscount = Math.round((currentSavings / oldPriceValue) * 100);
 
   return (
     <div className="min-h-screen bg-stone-50 text-slate-900">
@@ -309,7 +673,7 @@ export default function RealProductDetailsPage() {
               >
                 <img
                   src={activeImage}
-                  alt="product"
+                  alt={currentProduct.name}
                   className="h-full w-full cursor-zoom-in object-contain"
                   onClick={() => setIsImageOpen(true)}
                 />
@@ -339,7 +703,7 @@ export default function RealProductDetailsPage() {
                   <div className="flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-stone-100 text-[11px] text-slate-400">
                     <img
                       src={img}
-                      alt="thumb"
+                      alt={`${currentProduct.name} thumbnail`}
                       onClick={() => setActiveImage(img)}
                       className="h-full w-full cursor-pointer object-cover"
                     />
@@ -352,25 +716,7 @@ export default function RealProductDetailsPage() {
               <div className="grid gap-5 sm:grid-cols-3">
                 <div className="flex flex-col items-center text-center">
                   <div className="flex h-14 w-14 items-center justify-center text-[#5E7F85]">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      className="h-10 w-10"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 3l6 2.5v5.5c0 4.2-2.6 8-6 10-3.4-2-6-5.8-6-10V5.5L12 3z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 12l2 2 4-4"
-                      />
-                      <circle cx="12" cy="12" r="9" strokeDasharray="2 2" />
-                    </svg>
+                    Authentic
                   </div>
                   <div className="mt-2 text-sm font-medium text-slate-700">
                     100% Authentic Product
@@ -379,42 +725,7 @@ export default function RealProductDetailsPage() {
 
                 <div className="flex flex-col items-center text-center">
                   <div className="flex h-14 w-14 items-center justify-center text-[#5E7F85]">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      className="h-10 w-10"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 3a9 9 0 1 1-6.36 2.64"
-                      />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 3H3v3" />
-                      <text
-                        x="12"
-                        y="11"
-                        textAnchor="middle"
-                        fontSize="5.2"
-                        fill="currentColor"
-                        stroke="none"
-                        fontWeight="700"
-                      >
-                        24/7
-                      </text>
-                      <text
-                        x="12"
-                        y="16"
-                        textAnchor="middle"
-                        fontSize="3.2"
-                        fill="currentColor"
-                        stroke="none"
-                        fontWeight="600"
-                      >
-                        Support
-                      </text>
-                    </svg>
+                    24/7
                   </div>
                   <div className="mt-2 text-sm font-medium text-slate-700">
                     24/7 Customer Support
@@ -423,17 +734,7 @@ export default function RealProductDetailsPage() {
 
                 <div className="flex flex-col items-center text-center">
                   <div className="flex h-14 w-14 items-center justify-center text-[#5E7F85]">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      className="h-10 w-10"
-                    >
-                      <circle cx="12" cy="12" r="9" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
-                      <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
-                    </svg>
+                    Fast
                   </div>
                   <div className="mt-2 text-sm font-medium text-slate-700">
                     On Time Delivery
@@ -445,43 +746,45 @@ export default function RealProductDetailsPage() {
 
           <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Acne Balance Facewash
+              {currentProduct.name}
             </h1>
 
             <div className="mt-4">
               <div className="flex flex-wrap items-center gap-4 text-sm">
-                <span className="font-semibold">⭐ 4.8</span>
-                <span className="text-slate-500">128 reviews</span>
-                <span className="text-slate-500">1.2k sold</span>
+                <span className="font-semibold">⭐ {currentContent.rating}</span>
+                <span className="text-slate-500">{currentContent.reviewCount}</span>
+                <span className="text-slate-500">{currentContent.soldCount}</span>
                 <div className="flex items-center gap-3">
                   <span className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
-                    In Stock
+                    {getProductStatusLabel(currentProduct)}
                   </span>
-                  <span className="text-sm font-semibold text-rose-600">Only 7 left</span>
+                  <span className="text-sm font-semibold text-rose-600">
+                    {currentContent.urgencyText}
+                  </span>
                 </div>
               </div>
               <div className="mt-2">
                 <span className="flex items-center gap-1 text-sm font-semibold text-rose-600">
-                  🔥 327 people bought this in last 7 days
+                  🔥 {currentContent.recentBuyText}
                 </span>
               </div>
             </div>
 
             <div className="mt-6 flex flex-wrap items-end gap-3">
-              <div className="text-3xl font-bold">৳890</div>
-              <div className="text-lg text-slate-400 line-through">৳1,050</div>
+              <div className="text-3xl font-bold">{currentPrice}</div>
+              <div className="text-lg text-slate-400 line-through">{currentOldPrice}</div>
               <div className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-[#5E7F85]">
-                Save ৳160
+                Save {formatBDT(currentSavings)}
               </div>
               <div className="rounded-full bg-rose-50 px-3 py-1 text-sm font-semibold text-rose-600">
-                15% OFF
+                {currentDiscount}% OFF
               </div>
             </div>
 
             <div className="mt-6">
               <div className="text-sm font-semibold text-slate-900">Size</div>
               <div className="mt-3 flex flex-wrap gap-2">
-                {["100ml", "150ml"].map((size) => (
+                {availableSizes.map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
@@ -502,7 +805,7 @@ export default function RealProductDetailsPage() {
               <div className="mt-3 flex items-center gap-3">
                 <div className="flex w-fit items-center gap-4 rounded-full border border-slate-300 px-4 py-2">
                   <button onClick={handleDecreaseQty} className="text-lg text-slate-500">
-                    −
+                    -
                   </button>
                   <span className="text-sm font-semibold">{quantity}</span>
                   <button onClick={handleIncreaseQty} className="text-lg text-slate-700">
@@ -520,78 +823,69 @@ export default function RealProductDetailsPage() {
                   aria-label="wishlist"
                   title="wishlist"
                 >
-                  {wishlistAdded ? (
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-red-500">
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-white">
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                  )}
+                  ♥
                 </button>
               </div>
             </div>
 
             <p className="mt-6 text-sm leading-7 text-slate-600 md:text-base">
-              <strong className="text-[#5E7F85]">Why It Works:</strong> A gentle
-              acne-focused facewash designed to cleanse excess oil, dirt and buildup
-              without leaving the skin feeling stripped. It helps maintain a balanced,
-              fresh look while supporting a simple and effective daily skincare routine.
+              <strong className="text-[#5E7F85]">Why It Works:</strong>{" "}
+              {currentContent.description}
             </p>
 
             <div className="mt-6">
               <div className="text-sm font-semibold text-[#5E7F85]">Best For:</div>
               <ul className="mt-2 space-y-1.5 text-sm text-slate-600 md:text-base">
-                <li className="flex items-start gap-2">
-                  <span className="mt-1 text-[#5E7F85]">•</span>
-                  <span>Oily & Acne-Prone Skin</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="mt-1 text-[#5E7F85]">•</span>
-                  <span>Blackheads & Clogged Pores</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="mt-1 text-[#5E7F85]">•</span>
-                  <span>Daily Gentle Cleansing</span>
-                </li>
+                {currentContent.bestFor.map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <span className="mt-1 text-[#5E7F85]">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
             <div className="mt-6 flex flex-col gap-3 text-sm">
               <div className="flex items-center gap-2">
                 <span className="text-slate-500">SKU:</span>
-                <span className="font-semibold text-slate-600">20199</span>
+                <span className="font-semibold text-slate-600">{currentProduct.sku}</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="text-slate-500">Category:</span>
                 <button
-                  onClick={() => router.push("/category?category=skincare")}
+                  onClick={() =>
+                    router.push(
+                      `/category?category=${encodeURIComponent(
+                        currentProduct.category.toLowerCase()
+                      )}`
+                    )
+                  }
                   className="font-semibold text-[#5E7F85]"
                 >
-                  Skincare
+                  {currentProduct.category}
                 </button>
                 <span className="text-slate-400">,</span>
                 <button
-                  onClick={() => router.push("/category?category=skincare&subcategory=cleanser")}
+                  onClick={() =>
+                    router.push(
+                      `/category?category=${encodeURIComponent(
+                        currentProduct.category.toLowerCase()
+                      )}&subcategory=${encodeURIComponent(
+                        currentContent.subcategory.toLowerCase()
+                      )}`
+                    )
+                  }
                   className="font-semibold text-[#5E7F85]"
                 >
-                  Cleanser
+                  {currentContent.subcategory}
                 </button>
               </div>
 
               <div className="flex items-start gap-2">
                 <span className="pt-1 text-slate-500">Tags:</span>
                 <div className="flex flex-wrap gap-2">
-                  {[
-                    { label: "Acne Care", href: "/concern?concern=acne" },
-                    { label: "Oil Control", href: "/concern?concern=oily-skin" },
-                    {
-                      label: "Daily Cleanser",
-                      href: "/category?category=skincare&subcategory=cleanser",
-                    },
-                  ].map((tag) => (
+                  {currentContent.tags.map((tag) => (
                     <button
                       key={tag.label}
                       onClick={() => router.push(tag.href)}
@@ -606,10 +900,10 @@ export default function RealProductDetailsPage() {
               <div className="flex items-center gap-2">
                 <span className="text-slate-500">Brand:</span>
                 <button
-                  onClick={() => router.push("/brands")}
+                  onClick={() => router.push("/products")}
                   className="font-semibold text-[#5E7F85]"
                 >
-                  LUX
+                  {currentProduct.brand}
                 </button>
               </div>
             </div>
@@ -637,13 +931,17 @@ export default function RealProductDetailsPage() {
         </div>
       </section>
 
-      {isImageOpen && (
+      {isImageOpen ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
           onClick={() => setIsImageOpen(false)}
         >
           <div className="relative w-full max-w-3xl">
-            <img src={activeImage} alt="full" className="w-full rounded-2xl bg-white object-contain" />
+            <img
+              src={activeImage}
+              alt={`${currentProduct.name} full view`}
+              className="w-full rounded-2xl bg-white object-contain"
+            />
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -655,7 +953,7 @@ export default function RealProductDetailsPage() {
             </button>
           </div>
         </div>
-      )}
+      ) : null}
 
       <section className="mx-auto max-w-7xl px-4 pb-8 md:px-6">
         <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
@@ -789,12 +1087,12 @@ export default function RealProductDetailsPage() {
 
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { days: "14 Days", concern: "Acne" },
-              { days: "21 Days", concern: "Oily Skin" },
-              { days: "7 Days", concern: "Blackheads" },
+              { days: "14 Days", concern: currentProduct.concern },
+              { days: "21 Days", concern: currentContent.bestFor[0] ?? currentProduct.concern },
+              { days: "7 Days", concern: currentContent.subcategory },
             ].map((item, i) => (
               <div
-                key={i}
+                key={`${item.days}-${item.concern}-${i}`}
                 className="cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-stone-50 transition hover:shadow-md"
                 onClick={() => setIsImageOpen(true)}
               >
@@ -819,9 +1117,7 @@ export default function RealProductDetailsPage() {
                   <div className="text-sm font-semibold text-slate-900">
                     Visible improvement in {item.concern.toLowerCase()}
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Consistent routine usage
-                  </p>
+                  <p className="mt-1 text-xs text-slate-500">Consistent routine usage</p>
                 </div>
               </div>
             ))}
@@ -857,13 +1153,7 @@ export default function RealProductDetailsPage() {
             <div>
               <h2 className="text-2xl font-bold tracking-tight">Product Details</h2>
               <div className="mt-4 grid gap-2 text-justify text-sm leading-7 text-slate-600 md:text-base">
-                <p>
-                  This cleanser is designed for users who want a balanced daily wash
-                  experience for oily or acne-prone skin. It focuses on cleansing excess
-                  oil, dirt, and buildup while helping the routine stay simple and easy to
-                  follow. It fits well into a beginner-friendly skincare routine for daily
-                  use.
-                </p>
+                <p>{currentContent.tabDescription}</p>
               </div>
             </div>
           ) : null}
@@ -872,11 +1162,7 @@ export default function RealProductDetailsPage() {
             <div>
               <h2 className="text-2xl font-bold tracking-tight">How to Use</h2>
               <div className="mt-4 grid gap-2 text-justify text-sm leading-7 text-slate-600 md:text-base">
-                <p>
-                  1. Wet your face with water. 2. Take a small amount and lather gently. 3.
-                  Massage for 20–30 seconds. 4. Rinse well and follow with serum or
-                  moisturizer.
-                </p>
+                <p>{currentContent.howToUse}</p>
               </div>
             </div>
           ) : null}
@@ -885,10 +1171,7 @@ export default function RealProductDetailsPage() {
             <div>
               <h2 className="text-2xl font-bold tracking-tight">Ingredients</h2>
               <div className="mt-4 grid gap-2 text-justify text-sm leading-7 text-slate-600 md:text-base">
-                <p>
-                  Salicylic Acid, Niacinamide, Zinc PCA, Glycerin, and mild surfactant base
-                  with skin-supporting ingredients.
-                </p>
+                <p>{currentContent.ingredients}</p>
               </div>
             </div>
           ) : null}
@@ -899,24 +1182,12 @@ export default function RealProductDetailsPage() {
                 Frequently Asked Questions
               </h2>
               <div className="mt-4 space-y-4 text-sm text-slate-600 md:text-base">
-                <div>
-                  <p className="font-semibold text-slate-800">
-                    Is this suitable for daily use?
-                  </p>
-                  <p className="mt-1">Yes, it is gentle enough to be used twice daily.</p>
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-800">Can it help with acne?</p>
-                  <p className="mt-1">
-                    It helps control excess oil and supports acne-prone skin care routine.
-                  </p>
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-800">Will it dry out my skin?</p>
-                  <p className="mt-1">
-                    No, it is designed to cleanse without stripping natural moisture.
-                  </p>
-                </div>
+                {currentContent.faq.map((item) => (
+                  <div key={item.question}>
+                    <p className="font-semibold text-slate-800">{item.question}</p>
+                    <p className="mt-1">{item.answer}</p>
+                  </div>
+                ))}
               </div>
             </div>
           ) : null}
@@ -932,8 +1203,7 @@ export default function RealProductDetailsPage() {
                       <div className="text-sm text-slate-500">⭐ 4.{9 - r}</div>
                     </div>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Good everyday cleanser for oily skin. Feels balanced and easy to use
-                      in a simple routine.
+                      Good everyday product that feels easy to use in a simple routine.
                     </p>
                   </div>
                 ))}
@@ -991,7 +1261,7 @@ export default function RealProductDetailsPage() {
                       </div>
 
                       <button
-                        onClick={() => handleRecommendationAddToCart(recKey, p.name)}
+                        onClick={() => handleRecommendationAddToCart(recKey)}
                         className={`mt-3 w-full px-4 py-3 text-sm font-semibold shadow-sm transition ${
                           isAdded
                             ? "rounded-xl border border-[#5E7F85] bg-[#eef4f4] text-[#355055] hover:bg-[#e4efef]"
