@@ -644,22 +644,22 @@ export default function RealCheckoutPage({
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-900">
+    <div className="min-h-screen overflow-x-hidden bg-stone-50 text-slate-900">
       <SiteHeader title="Checkout" />
 
-      <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
-        <h1 className="text-3xl font-bold tracking-tight text-[#5E7F85]">
+      <section className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10">
+        <h1 className="text-2xl font-bold tracking-tight text-[#5E7F85] md:text-3xl">
           Order &amp; Shipping Details
         </h1>
 
         <form
           onSubmit={handlePlaceOrder}
-          className="mt-8 grid items-stretch gap-6 lg:grid-cols-[1fr_380px]"
+          className="mt-6 grid items-stretch gap-5 lg:mt-8 lg:grid-cols-[1fr_380px] lg:gap-6"
         >
           <div className="h-full">
-            <div className="h-full rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <div className="h-full rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm md:rounded-[2rem] md:p-8">
               <div className="grid gap-4">
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2 md:gap-4">
                   <input
                     name="customer_name"
                     className="rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-[#5E7F85]"
@@ -674,7 +674,7 @@ export default function RealCheckoutPage({
                   />
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2 md:gap-4">
                   <textarea
                     name="customer_address"
                     className="min-h-[56px] rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-[#5E7F85] md:min-h-[56px]"
@@ -694,7 +694,7 @@ export default function RealCheckoutPage({
                   placeholder="Order Note (Optional)"
                 />
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2 md:gap-4">
                   <select
                     value={selectedDistrict}
                     onChange={handleDistrictChange}
@@ -729,7 +729,7 @@ export default function RealCheckoutPage({
             </div>
           </div>
 
-          <aside className="flex h-full flex-col rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+          <aside className="flex h-full flex-col rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm md:rounded-[2rem] md:p-6">
             <div className="text-sm font-semibold text-slate-900">ORDER SUMMARY</div>
 
             <div className="mt-6 border-t pt-4 text-sm">

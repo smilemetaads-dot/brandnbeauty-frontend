@@ -217,7 +217,7 @@ function HomePagePreview({
   }, [heroSlides.length]);
 
   return (
-    <div className="min-h-screen bg-stone-50 text-slate-900">
+    <div className="min-h-screen overflow-x-hidden bg-stone-50 text-slate-900">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-6">
           <a href="/" className="flex items-center">
@@ -597,27 +597,27 @@ export function CartPagePreview({
         </div>
       </header>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 md:px-6">
+      <section className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10">
         <h1 className="text-3xl font-bold tracking-tight">Your Cart</h1>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
+        <div className="mt-6 grid gap-5 lg:mt-8 lg:grid-cols-[1fr_340px] lg:gap-6">
           <div className="space-y-4">
             {items.map((item) => (
               <div
                 key={`${item.id}-${item.size ?? ""}`}
-                className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:gap-4 sm:p-4"
               >
                 <div className="overflow-hidden rounded-xl bg-stone-100">
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="h-24 w-24 object-cover"
+                    className="h-20 w-20 object-cover sm:h-24 sm:w-24"
                   />
                 </div>
 
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <div className="text-xs text-slate-500">{item.brand}</div>
-                  <div className="font-semibold">{item.name}</div>
+                  <div className="line-clamp-2 font-semibold">{item.name}</div>
                   {item.size ? (
                     <div className="mt-1 text-xs text-slate-500">{item.size}</div>
                   ) : null}
@@ -643,7 +643,7 @@ export function CartPagePreview({
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center gap-1 self-center">
+                <div className="flex shrink-0 flex-col items-end justify-center gap-1 self-center text-right">
                   <div className="font-semibold">
                     ৳{(item.price * item.qty).toLocaleString()}
                   </div>
@@ -660,7 +660,7 @@ export function CartPagePreview({
             ))}
           </div>
 
-          <aside className="sticky top-24 h-fit rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24 lg:p-6">
             <h2 className="text-lg font-semibold">Order Summary</h2>
 
             <div className="mt-4 rounded-2xl bg-stone-50 p-4">

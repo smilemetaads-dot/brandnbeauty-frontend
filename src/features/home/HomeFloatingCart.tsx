@@ -68,7 +68,7 @@ export default function HomeFloatingCart({
       <button
         type="button"
         onClick={onOpenCart}
-        className="group fixed right-0 top-1/2 z-40 -translate-y-1/2 overflow-hidden rounded-l-2xl border border-slate-200 shadow-xl transition-all duration-300 hover:shadow-2xl"
+        className="group fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 overflow-hidden rounded-l-2xl border border-slate-200 shadow-xl transition-all duration-300 hover:shadow-2xl md:block"
       >
         <div className="flex flex-col items-center justify-center bg-[#5E7F85] px-3 py-3 text-white">
           <div className="mt-1 text-[11px] font-semibold">{bagCount} ITEMS</div>
@@ -80,10 +80,10 @@ export default function HomeFloatingCart({
         href="https://m.me/yourpage"
         target="_blank"
         rel="noopener noreferrer"
-        className="group fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#5E7F85] text-white shadow-[0_18px_40px_rgba(94,127,133,0.35)] transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-[#4e6e73] hover:shadow-[0_24px_50px_rgba(94,127,133,0.45)]"
+        className="group fixed bottom-20 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#5E7F85] text-white shadow-[0_18px_40px_rgba(94,127,133,0.35)] transition-all duration-300 hover:-translate-y-1 hover:scale-105 hover:bg-[#4e6e73] hover:shadow-[0_24px_50px_rgba(94,127,133,0.45)] md:bottom-5 md:right-5 md:h-14 md:w-14"
         aria-label="Open Messenger"
       >
-        <span className="absolute inline-flex h-14 w-14 animate-ping rounded-full bg-[#5E7F85] opacity-60 blur-md"></span>
+        <span className="absolute inline-flex h-12 w-12 animate-ping rounded-full bg-[#5E7F85] opacity-60 blur-md md:h-14 md:w-14"></span>
         <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/16 ring-1 ring-white/20 transition group-hover:bg-white/20">
           <MessengerIcon />
         </span>
@@ -91,7 +91,7 @@ export default function HomeFloatingCart({
 
       {isCartOpen ? <button type="button" aria-label="Close cart overlay" onClick={onCloseCart} className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[1px]" /> : null}
 
-      <div className={`fixed right-0 top-0 z-50 h-full w-[440px] bg-white shadow-2xl transition-transform duration-300 ease-out md:w-[460px] ${isCartOpen ? "translate-x-0" : "translate-x-full"}`}>
+      <div className={`fixed right-0 top-0 z-50 h-full w-full max-w-[440px] bg-white shadow-2xl transition-transform duration-300 ease-out md:w-[460px] ${isCartOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="relative border-b border-slate-200 px-5 py-5">
           <div className="text-center text-[1.05rem] font-semibold tracking-[0.2em] text-slate-800">BAG</div>
           <button onClick={onCloseCart} className="absolute right-4 top-1/2 -translate-y-1/2 text-xl text-slate-500 transition hover:text-slate-800">×</button>

@@ -145,7 +145,7 @@ export default function BrandnBeautyWebsite() {
     return () => clearInterval(timer);
   }, [pausedResults]);
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen overflow-x-hidden bg-white pb-20 text-slate-900 md:pb-0">
       <SiteHeader
         bagCount={bagCount}
         brandSearch={brandSearch}

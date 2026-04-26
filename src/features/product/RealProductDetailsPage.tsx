@@ -1062,7 +1062,7 @@ function RealProductDetailsContent({
             <div className="flex flex-1 flex-wrap items-center gap-5">
               {frequentlyBought.map((item, idx) => (
                 <React.Fragment key={item.name}>
-                  <div className="relative flex min-w-[280px] flex-1 items-center gap-4 rounded-2xl bg-stone-50 p-4 md:max-w-[380px]">
+                  <div className="relative flex min-w-0 flex-1 basis-full items-center gap-3 rounded-2xl bg-stone-50 p-3 sm:basis-[280px] sm:gap-4 sm:p-4 md:max-w-[380px]">
                     <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-white text-xs text-slate-400 ring-1 ring-slate-200">
                       Image
                     </div>
@@ -1080,7 +1080,7 @@ function RealProductDetailsContent({
               ))}
             </div>
 
-            <div className="ml-auto flex flex-col items-center justify-center gap-3">
+            <div className="ml-auto flex w-full flex-col items-center justify-center gap-3 sm:w-auto">
               <div className="text-lg text-slate-600">
                 Total Price:{" "}
                 <span className="font-bold text-[#5E7F85]">{formatBDT(fbTotal)}</span>
@@ -1090,7 +1090,7 @@ function RealProductDetailsContent({
               </div>
               <button
                 onClick={handleAddBundleToCart}
-                className={`mt-1 rounded-xl px-6 py-3 text-sm font-semibold shadow-sm transition ${
+                className={`mt-1 w-full rounded-xl px-6 py-3 text-sm font-semibold shadow-sm transition sm:w-auto ${
                   fbBundleAdded
                     ? "border border-[#5E7F85] bg-[#eef4f4] text-[#355055] hover:bg-[#e4efef]"
                     : "bg-[#5E7F85] text-white hover:bg-[#4f6b70]"
@@ -1159,7 +1159,7 @@ function RealProductDetailsContent({
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-16 md:px-6">
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
           {[
             { key: "description", label: "DESCRIPTION" },
             { key: "how_to_use", label: "HOW TO USE" },
@@ -1170,7 +1170,7 @@ function RealProductDetailsContent({
             <button
               key={tab.key}
               onClick={() => setActiveInfoTab(tab.key)}
-              className={`rounded-[1rem] px-3 py-4 text-center text-[12px] font-bold uppercase tracking-wide transition ${
+              className={`rounded-[1rem] px-2 py-3 text-center text-[10px] font-bold uppercase tracking-wide transition sm:px-3 sm:py-4 sm:text-[12px] ${
                 activeInfoTab === tab.key
                   ? "bg-[#5E7F85] text-white shadow-sm"
                   : "bg-[#dfe3e8] text-[#5f6f86] hover:bg-[#d6dbe2]"
@@ -1250,7 +1250,7 @@ function RealProductDetailsContent({
         {recommendationTitles.map((title) => (
           <div key={title}>
             <h3 className="text-xl font-semibold">{title}</h3>
-            <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
               {recommendationProducts.map((p, i) => {
                 const recKey = `${title}-${i}-${p.name}`;
                 const isAdded = !!addedRecommendationKeys[recKey];

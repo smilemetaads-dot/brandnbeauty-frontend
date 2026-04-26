@@ -22,17 +22,17 @@ export default function HomeCategories({ onGoToCategoryPage }: HomeCategoriesPro
         <div className="mb-8 text-center">
           <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-900 md:text-2xl">SHOP BY CATEGORY</h2>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {CATEGORIES.map((item) => (
             <button
               key={item.name}
               type="button"
               onClick={() => onGoToCategoryPage(item.name)}
-              className="cursor-pointer overflow-hidden rounded-3xl border border-[#5E7F85] bg-gradient-to-br from-[#5E7F85] to-[#6f9aa0] text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              className="cursor-pointer overflow-hidden rounded-2xl border border-[#5E7F85] bg-gradient-to-br from-[#5E7F85] to-[#6f9aa0] text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:rounded-3xl"
             >
               <div className="flex aspect-square w-full items-center justify-center bg-white text-sm text-slate-400">Category Image</div>
-              <div className="p-4">
-                <div className="text-center text-lg font-semibold text-white">{item.name}</div>
+              <div className="p-3 sm:p-4">
+                <div className="text-center text-sm font-semibold text-white sm:text-lg">{item.name}</div>
               </div>
             </button>
           ))}

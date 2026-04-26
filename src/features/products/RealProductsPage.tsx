@@ -351,11 +351,11 @@ function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md sm:rounded-[1.8rem]">
       <Link href={productHref} className="relative flex flex-1 flex-col">
         <div className="group relative aspect-[1/0.88] overflow-hidden bg-[#f1f1f1]">
           {discount > 0 ? (
-            <div className="absolute left-0 top-0 z-10 rounded-br-2xl rounded-tl-[1.8rem] bg-[#6f8f95] px-3 py-2 text-[0.95rem] font-bold leading-none text-white shadow-sm">
+            <div className="absolute left-0 top-0 z-10 rounded-br-2xl rounded-tl-2xl bg-[#6f8f95] px-2 py-1.5 text-[0.75rem] font-bold leading-none text-white shadow-sm sm:rounded-tl-[1.8rem] sm:px-3 sm:py-2 sm:text-[0.95rem]">
               {discount}% OFF
             </div>
           ) : null}
@@ -365,29 +365,29 @@ function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col border-t border-slate-100 px-5 pb-5 pt-4">
-          <div className="min-h-[4.4rem] text-[1.02rem] leading-8 text-[#4d6587]">
+        <div className="flex flex-1 flex-col border-t border-slate-100 px-3 pb-3 pt-3 sm:px-5 sm:pb-5 sm:pt-4">
+          <div className="min-h-[3.2rem] text-[0.86rem] leading-5 text-[#4d6587] sm:min-h-[4.4rem] sm:text-[1.02rem] sm:leading-8">
             {product.name}
           </div>
 
-          <div className="mt-3 min-h-[2.9rem]">
+          <div className="mt-2 min-h-[1.7rem] sm:mt-3 sm:min-h-[2.9rem]">
             {product.freeDelivery ? (
-              <div className="inline-flex rounded-full bg-[#6f8f95] px-4 py-2 text-[0.88rem] font-semibold uppercase leading-none tracking-wide text-white">
+              <div className="inline-flex rounded-full bg-[#6f8f95] px-2 py-1 text-[0.62rem] font-semibold uppercase leading-none tracking-wide text-white sm:px-4 sm:py-2 sm:text-[0.88rem]">
                 FREE SHIPPING
               </div>
             ) : product.badge ? (
-              <div className="inline-flex rounded-full bg-[#6f8f95] px-4 py-2 text-[0.88rem] font-semibold uppercase leading-none tracking-wide text-white">
+              <div className="inline-flex rounded-full bg-[#6f8f95] px-2 py-1 text-[0.62rem] font-semibold uppercase leading-none tracking-wide text-white sm:px-4 sm:py-2 sm:text-[0.88rem]">
                 SALE
               </div>
             ) : null}
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-3 text-[1.05rem]">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-1 text-[0.78rem] sm:mt-3 sm:gap-3 sm:text-[1.05rem]">
             <span className="text-slate-400 line-through">৳ {numericOldPrice.toFixed(2)}</span>
             <span className="font-semibold text-[#6f8f95]">৳ {numericPrice.toFixed(2)}</span>
           </div>
 
-          <div className="mt-5 flex items-center justify-center gap-1 text-[1.05rem]">
+          <div className="mt-3 flex items-center justify-center gap-0.5 text-[0.85rem] sm:mt-5 sm:gap-1 sm:text-[1.05rem]">
             {Array.from({ length: fullStars }).map((_, i) => (
               <span key={`full-${i}`} className="text-[#f2b01e]">
                 ★
@@ -406,7 +406,7 @@ function ProductCard({ product }: { product: Product }) {
       <Link
         href="/cart"
         onClick={handleAddToCart}
-        className="w-full bg-[#6f8f95] px-5 py-4 text-center text-[1.12rem] font-semibold text-white transition duration-200 hover:bg-[#5E7F85] active:scale-[0.99]"
+        className="w-full bg-[#6f8f95] px-3 py-3 text-center text-[0.85rem] font-semibold text-white transition duration-200 hover:bg-[#5E7F85] active:scale-[0.99] sm:px-5 sm:py-4 sm:text-[1.12rem]"
       >
         Add to Cart
       </Link>
@@ -705,7 +705,7 @@ function MasterPLPPreview({
         </div>
       </header>
 
-      <section className="mx-auto max-w-[1480px] px-6 py-8">
+      <section className="mx-auto max-w-[1480px] px-4 py-6 sm:px-6 sm:py-8">
         {mode === "category" ? (
           <Link href="/category?category=offers" className="mb-6 block overflow-hidden rounded-2xl">
             <img
@@ -716,10 +716,10 @@ function MasterPLPPreview({
           </Link>
         ) : null}
 
-        <div className="grid gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
-          <aside className="sticky top-6 h-fit rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)] xl:gap-6">
+          <aside className="max-h-[48vh] overflow-y-auto rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm xl:sticky xl:top-6 xl:h-fit xl:max-h-none xl:overflow-visible xl:rounded-[2rem] xl:p-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-[2rem] font-bold leading-none">Filters</h2>
+              <h2 className="text-xl font-bold leading-none xl:text-[2rem]">Filters</h2>
               {showClear ? (
                 <button
                   onClick={clearAllFilters}
@@ -1062,7 +1062,7 @@ function MasterPLPPreview({
           </aside>
 
           <div>
-            <div className="mb-6 flex items-center gap-3 rounded-[1.4rem] border border-slate-200 bg-white px-5 py-4 shadow-sm">
+            <div className="mb-4 flex items-center gap-3 rounded-[1.4rem] border border-slate-200 bg-white px-4 py-3 shadow-sm sm:mb-6 sm:px-5 sm:py-4">
               <span className="text-[1.35rem] text-[#6f88ac]">⌕</span>
               <input
                 className="w-full bg-transparent text-[1.08rem] outline-none placeholder:text-[#9aa8c0]"
@@ -1070,8 +1070,8 @@ function MasterPLPPreview({
               />
             </div>
 
-            <div className="mb-6 flex items-center justify-end gap-3">
-              <select className="rounded-xl border border-[#c9d5d8] bg-white px-6 py-3 text-[1.05rem] font-semibold text-[#23395b] outline-none shadow-sm">
+            <div className="mb-4 flex items-center justify-end gap-3 sm:mb-6">
+              <select className="w-full rounded-xl border border-[#c9d5d8] bg-white px-4 py-3 text-sm font-semibold text-[#23395b] outline-none shadow-sm sm:w-auto sm:px-6 sm:text-[1.05rem]">
                 <option>Featured</option>
                 <option>Best Selling</option>
                 <option>Price: Low to High</option>
@@ -1109,7 +1109,7 @@ function MasterPLPPreview({
                 No products found. Try adjusting filters.
               </div>
             ) : (
-              <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid auto-rows-fr grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
                 {filteredProducts.slice(0, 30).map((product, index) => (
                   <ProductCard key={`${product.name}-${index}`} product={product} />
                 ))}

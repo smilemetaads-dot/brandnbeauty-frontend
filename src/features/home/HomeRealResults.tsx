@@ -102,7 +102,7 @@ export default function HomeRealResults({
         <div className="mb-8 text-center">
           <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-900 md:text-2xl">REAL RESULTS</h2>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {REAL_RESULTS.map((item, cardIndex) => {
             const activeIndex = resultIndexes[cardIndex] || 0;
             const isPaused = pausedResults[cardIndex];
@@ -115,9 +115,9 @@ export default function HomeRealResults({
                   window.location.href = getRealResultLink(item.title);
                 }}
                 onKeyDown={(event) => handleResultCardKeyDown(event, item.title)}
-                className="cursor-pointer overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#5E7F85]/40"
+                className="cursor-pointer overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#5E7F85]/40 sm:rounded-[1.75rem]"
               >
-                <div className="relative min-h-[420px] aspect-[9/16] overflow-hidden bg-[#f6f8f8]">
+                <div className="relative aspect-[9/16] min-h-[250px] overflow-hidden bg-[#f6f8f8] sm:min-h-[420px]">
                   <div className="flex h-full w-full transition-transform duration-500 ease-out" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
                     {item.items.map((slide, idx) => (
                       <div key={idx} className="flex min-w-full items-center justify-center text-slate-400">
@@ -126,8 +126,8 @@ export default function HomeRealResults({
                     ))}
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                  <div className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-800">{item.type}</div>
-                  <div className="absolute right-3 top-3 flex items-center gap-2">
+                  <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.08em] text-slate-800 sm:left-3 sm:top-3 sm:px-3 sm:text-[10px]">{item.type}</div>
+                  <div className="absolute right-2 top-2 flex items-center gap-1 sm:right-3 sm:top-3 sm:gap-2">
                     <div className="rounded-full bg-black/35 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-sm">{activeIndex % 2 === 0 ? "ðŸ”‡" : "ðŸ”Š"}</div>
                     <button
                       type="button"
@@ -135,14 +135,14 @@ export default function HomeRealResults({
                         event.stopPropagation();
                         onTogglePause(cardIndex);
                       }}
-                      className="rounded-full bg-black/35 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white backdrop-blur-sm"
+                      className="rounded-full bg-black/35 px-2 py-1 text-[8px] font-semibold uppercase tracking-[0.08em] text-white backdrop-blur-sm sm:px-3 sm:text-[10px]"
                     >
                       {isPaused ? "Play" : "Pause"}
                     </button>
                   </div>
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <div className="text-xl font-semibold uppercase tracking-tight">{item.title}</div>
-                    <div className="mt-3 flex items-center gap-2">
+                  <div className="absolute bottom-3 left-3 right-3 text-white sm:bottom-4 sm:left-4 sm:right-4">
+                    <div className="text-sm font-semibold uppercase tracking-tight sm:text-xl">{item.title}</div>
+                    <div className="mt-2 flex items-center gap-1.5 sm:mt-3 sm:gap-2">
                       {item.items.map((_, dotIndex) => (
                         <button
                           key={dotIndex}

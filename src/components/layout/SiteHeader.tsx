@@ -172,7 +172,7 @@ export default function SiteHeader({
           <div className="flex h-10 items-center text-2xl font-bold tracking-tight text-[#5E7F85]">BrandnBeauty</div>
         </Link>
 
-        <div className="relative flex flex-1 items-center justify-center gap-6 px-8">
+        <div className="relative hidden flex-1 items-center justify-center gap-6 px-8 md:flex">
           <div className="group static hidden md:block">
             <Link href="/brands" className="relative text-sm font-medium text-slate-700 hover:text-[#5E7F85] after:absolute after:-bottom-1 after:left-0 after:h-[2px] after:w-0 after:bg-[#5E7F85] after:transition-all group-hover:after:w-full">
               Brands
@@ -261,7 +261,7 @@ export default function SiteHeader({
           <button className="hidden min-w-[104px] items-center justify-center gap-2 rounded-full bg-[#eef1f4] px-6 py-[0.8rem] text-[0.98rem] font-semibold tracking-[0.01em] text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition hover:bg-[#e5eaee] hover:text-slate-900 md:flex">
             Login
           </button>
-          <button onClick={onOpenCart} className="min-w-[146px] rounded-full bg-[#6f8f95] px-6 py-[0.85rem] text-[1rem] font-bold tracking-[0.04em] text-white shadow-[0_10px_22px_rgba(94,127,133,0.2)] transition hover:-translate-y-[1px] hover:bg-[#5E7F85] hover:shadow-[0_12px_26px_rgba(94,127,133,0.28)] active:translate-y-0">
+          <button onClick={onOpenCart} className="min-w-[96px] rounded-full bg-[#6f8f95] px-4 py-2.5 text-sm font-bold tracking-[0.04em] text-white shadow-[0_10px_22px_rgba(94,127,133,0.2)] transition hover:-translate-y-[1px] hover:bg-[#5E7F85] hover:shadow-[0_12px_26px_rgba(94,127,133,0.28)] active:translate-y-0 md:min-w-[146px] md:px-6 md:py-[0.85rem] md:text-[1rem]">
             <span className="inline-flex items-center gap-2.5">
               <span>Bag</span>
               <span className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full bg-white px-1.5 text-[12px] font-bold leading-none text-[#5E7F85] shadow">{bagCount}</span>
@@ -270,7 +270,7 @@ export default function SiteHeader({
         </div>
       </div>
 
-      <div className="border-t border-slate-100 bg-white">
+      <div className="hidden border-t border-slate-100 bg-white md:block">
         <div className="mx-auto flex max-w-7xl justify-center px-4 py-4 md:px-6">
           <nav className="relative flex flex-wrap items-center gap-8 text-sm font-medium text-slate-700">
             {CATEGORIES.map((item) => {
