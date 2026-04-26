@@ -5,17 +5,17 @@ import { getProductBySlugFromSupabase } from "@/lib/products/supabaseProducts";
 
 export const dynamic = "force-dynamic";
 
-type ProductPageProps = {
-  searchParams?: Promise<{
-    product?: string;
+type ProductDetailsPageProps = {
+  params: Promise<{
+    slug: string;
   }>;
 };
 
-export default async function ProductPage({ searchParams }: ProductPageProps) {
-  const params = (await searchParams) ?? {};
-  const product = params.product
-    ? await getProductBySlugFromSupabase(params.product)
-    : null;
+export default async function ProductDetailsPage({
+  params,
+}: ProductDetailsPageProps) {
+  const resolvedParams = await params;
+  const product = await getProductBySlugFromSupabase(resolvedParams.slug);
 
   return (
     <Suspense fallback={null}>

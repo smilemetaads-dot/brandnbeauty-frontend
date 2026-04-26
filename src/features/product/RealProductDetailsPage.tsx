@@ -1,9 +1,10 @@
 "use client";
 
+import { addCartItem, cartUpdatedEvent, readCart } from "@/lib/cart/store";
 import { mockProducts } from "@/lib/mock/products";
 import type { ProductRecord } from "@/lib/types/product";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 declare global {
@@ -52,8 +53,6 @@ type PDPContent = {
   ingredients: string;
   faq: Array<{ question: string; answer: string }>;
 };
-
-const DEFAULT_PRODUCT_ID = "prd_acne_balance_facewash";
 
 const PRODUCT_LOOKUP = new Map(mockProducts.map((product) => [product.id, product]));
 
@@ -273,18 +272,6 @@ function getProductStatusLabel(product: ProductRecord): string {
   return "In Stock";
 }
 
-function getSharedProductBySlug(slug: string | null): ProductRecord | null {
-  if (!slug) {
-    return PRODUCT_LOOKUP.get(DEFAULT_PRODUCT_ID) ?? null;
-  }
-
-  return (
-    mockProducts.find((product) => product.slug === slug) ??
-    PRODUCT_LOOKUP.get(DEFAULT_PRODUCT_ID) ??
-    null
-  );
-}
-
 function buildDefaultPDPContent(product: ProductRecord): PDPContent {
   return {
     sourceId: product.id,
@@ -321,13 +308,30 @@ function buildDefaultPDPContent(product: ProductRecord): PDPContent {
   };
 }
 
-export default function RealProductDetailsPage() {
-  const searchParams = useSearchParams();
-  const productSlug = searchParams.get("product");
-  const currentProduct = getSharedProductBySlug(productSlug);
-
+export default function RealProductDetailsPage({
+  currentProduct,
+}: {
+  currentProduct: ProductRecord | null;
+}) {
   if (!currentProduct) {
-    return null;
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-16 md:px-6">
+        <div className="rounded-[2rem] border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Product not found
+          </h1>
+          <p className="mt-3 text-sm text-slate-600 md:text-base">
+            This product could not be loaded right now.
+          </p>
+          <Link
+            href="/products"
+            className="mt-6 inline-flex rounded-2xl bg-[#5E7F85] px-5 py-3 text-sm font-semibold text-white"
+          >
+            Back to Products
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const currentContent =
@@ -521,6 +525,21 @@ function RealProductDetailsContent({
     }
   };
 
+  React.useEffect(() => {
+    const syncBagCount = () => {
+      setBagCount(readCart().reduce((sum, item) => sum + item.quantity, 0));
+    };
+
+    syncBagCount();
+    window.addEventListener("storage", syncBagCount);
+    window.addEventListener(cartUpdatedEvent, syncBagCount);
+
+    return () => {
+      window.removeEventListener("storage", syncBagCount);
+      window.removeEventListener(cartUpdatedEvent, syncBagCount);
+    };
+  }, []);
+
   const handleDecreaseQty = () => setQuantity((q) => Math.max(1, q - 1));
   const handleIncreaseQty = () => setQuantity((q) => q + 1);
 
@@ -529,7 +548,21 @@ function RealProductDetailsContent({
       router.push("/cart");
       return;
     }
-    setBagCount((c) => c + quantity);
+
+    addCartItem({
+      id: currentProduct.id,
+      slug: currentProduct.slug,
+      sku: currentProduct.sku,
+      name: currentProduct.name,
+      image: currentProduct.image || "/products/pdp-1.jpg",
+      price: currentProduct.price,
+      quantity,
+      brand: currentProduct.brand,
+      category: currentProduct.category,
+      concern: currentProduct.concern,
+      status: currentProduct.status,
+      size: selectedSize,
+    });
     setMainAddedToCart(true);
     router.push("/cart");
   };

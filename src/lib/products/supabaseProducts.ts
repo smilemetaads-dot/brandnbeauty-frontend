@@ -60,6 +60,35 @@ export async function getProductsFromSupabase(): Promise<ProductRecord[] | null>
   return data.map(mapProductRow);
 }
 
+export async function getProductBySlugFromSupabase(
+  slug: string,
+): Promise<ProductRecord | null> {
+  const supabase = createSupabaseClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .schema(PRODUCTS_SCHEMA)
+    .from(PRODUCTS_TABLE)
+    .select("*")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[products] Supabase product-by-slug query failed:", {
+      table: `${PRODUCTS_SCHEMA}.${PRODUCTS_TABLE}`,
+      slug,
+      code: error.code,
+      message: error.message,
+    });
+    return null;
+  }
+
+  return data ? mapProductRow(data) : null;
+}
+
 function mapProductRow(row: ProductRow): ProductRecord {
   const name = toText(row.name, "Untitled Product");
   const slug = toText(row.slug, slugify(name));

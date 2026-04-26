@@ -1,5 +1,6 @@
 "use client";
 
+import { addCartItem } from "@/lib/cart/store";
 import type { ProductRecord } from "@/lib/types/product";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
@@ -11,7 +12,11 @@ const PRESET_CONCERN = "Acne" as const;
 type PLPMode = "products" | "category" | "concern";
 
 type Product = {
+  id: string;
+  slug: string;
+  sku: string;
   name: string;
+  image: string;
   brand: string;
   category: string;
   concerns: string[];
@@ -98,7 +103,11 @@ function mapProductRecordToCard(product: ProductRecord): Product {
   const concern = normalizeFilterValue(product.concern, AVAILABLE_CONCERNS);
 
   return {
+    id: product.id,
+    slug: product.slug,
+    sku: product.sku,
     name: product.name,
+    image: product.image || "/products/pdp-1.jpg",
     brand: product.brand,
     category,
     concerns: [concern],
@@ -131,8 +140,8 @@ function toSlug(value: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-function buildProductHref(productName: string): string {
-  return `/product?product=${encodeURIComponent(toSlug(productName))}`;
+function buildProductHref(productSlug: string): string {
+  return `/product/${encodeURIComponent(productSlug)}`;
 }
 
 function fromSlug<T extends string>(
@@ -323,7 +332,23 @@ function ProductCard({ product }: { product: Product }) {
     numericOldPrice > numericPrice
       ? Math.round(((numericOldPrice - numericPrice) / numericOldPrice) * 100)
       : 0;
-  const productHref = buildProductHref(product.name);
+  const productHref = buildProductHref(product.slug);
+
+  const handleAddToCart = () => {
+    addCartItem({
+      id: product.id,
+      slug: product.slug,
+      sku: product.sku,
+      name: product.name,
+      image: product.image,
+      price: numericPrice,
+      quantity: 1,
+      brand: product.brand,
+      category: product.category,
+      concern: product.concerns[0] || "General",
+      status: "active",
+    });
+  };
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md">
@@ -378,7 +403,11 @@ function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
 
-      <Link href={productHref} className="w-full bg-[#6f8f95] px-5 py-4 text-center text-[1.12rem] font-semibold text-white transition duration-200 hover:bg-[#5E7F85] active:scale-[0.99]">
+      <Link
+        href="/cart"
+        onClick={handleAddToCart}
+        className="w-full bg-[#6f8f95] px-5 py-4 text-center text-[1.12rem] font-semibold text-white transition duration-200 hover:bg-[#5E7F85] active:scale-[0.99]"
+      >
         Add to Cart
       </Link>
     </div>

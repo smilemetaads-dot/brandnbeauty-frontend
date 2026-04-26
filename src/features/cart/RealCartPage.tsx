@@ -3,16 +3,27 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
+import {
+  cartUpdatedEvent,
+  readCart,
+  removeCartItem,
+  type StoredCartItem,
+  updateCartItemQuantity,
+} from "@/lib/cart/store";
 
 const PREVIEW_PAGE = "cart";
 
 type PreviewPage = "home" | "category" | "pdp" | "cart";
 
 type CartItem = {
+  id: string;
+  slug: string;
+  image: string;
   name: string;
   brand: string;
   price: number;
   qty: number;
+  size?: string;
 };
 
 function calculateCartSummary(
@@ -36,8 +47,8 @@ function calculateCartSummary(
 
 function runCartSummaryTests() {
   const case1 = calculateCartSummary([
-    { name: "A", brand: "B", price: 890, qty: 1 },
-    { name: "C", brand: "D", price: 990, qty: 1 },
+    { id: "1", slug: "a", image: "", name: "A", brand: "B", price: 890, qty: 1 },
+    { id: "2", slug: "c", image: "", name: "C", brand: "D", price: 990, qty: 1 },
   ]);
 
   if (case1.subtotal !== 1880) throw new Error("Test failed: subtotal should be 1880");
@@ -48,7 +59,9 @@ function runCartSummaryTests() {
     throw new Error("Test failed: total should be 1880 when delivery is free");
   }
 
-  const case2 = calculateCartSummary([{ name: "A", brand: "B", price: 500, qty: 2 }]);
+  const case2 = calculateCartSummary([
+    { id: "1", slug: "a", image: "", name: "A", brand: "B", price: 500, qty: 2 },
+  ]);
   if (case2.subtotal !== 1000) throw new Error("Test failed: subtotal should be 1000");
   if (case2.delivery !== 80) {
     throw new Error("Test failed: delivery should be 80 below threshold");
@@ -64,7 +77,9 @@ function runCartSummaryTests() {
     throw new Error("Test failed: empty cart delivery should be default delivery charge");
   }
 
-  const case4 = calculateCartSummary([{ name: "A", brand: "B", price: 1500, qty: 1 }]);
+  const case4 = calculateCartSummary([
+    { id: "1", slug: "a", image: "", name: "A", brand: "B", price: 1500, qty: 1 },
+  ]);
   if (case4.subtotal !== 1500) {
     throw new Error("Test failed: threshold subtotal should be 1500");
   }
@@ -75,12 +90,16 @@ function runCartSummaryTests() {
     throw new Error("Test failed: remaining should be 0 at threshold");
   }
 
-  const case5 = calculateCartSummary([{ name: "A", brand: "B", price: 300, qty: 3 }]);
+  const case5 = calculateCartSummary([
+    { id: "1", slug: "a", image: "", name: "A", brand: "B", price: 300, qty: 3 },
+  ]);
   if (case5.subtotal !== 900) {
     throw new Error("Test failed: subtotal should respect quantity multiplication");
   }
 
-  const case6 = calculateCartSummary([{ name: "A", brand: "B", price: 890, qty: 2 }]);
+  const case6 = calculateCartSummary([
+    { id: "1", slug: "a", image: "", name: "A", brand: "B", price: 890, qty: 2 },
+  ]);
   if (case6.subtotal !== 1780) {
     throw new Error("Test failed: subtotal should update for increased quantity");
   }
@@ -495,22 +514,40 @@ export function CartPagePreview({
   setCurrentPage: (page: PreviewPage) => void;
 }) {
   const router = useRouter();
-  const [items, setItems] = useState<CartItem[]>([
-    { name: "Acne Balance Facewash", brand: "Some By Mi", price: 890, qty: 1 },
-    { name: "Barrier Calm Serum", brand: "BrandnBeauty", price: 990, qty: 1 },
-  ]);
+  const [items, setItems] = useState<CartItem[]>([]);
 
-  const updateQty = (name: string, change: number) => {
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.name !== name) return item;
-        return { ...item, qty: Math.max(1, item.qty + change) };
-      })
-    );
+  useEffect(() => {
+    const syncCart = () => {
+      setItems(
+        readCart().map((item: StoredCartItem) => ({
+          id: item.id,
+          slug: item.slug,
+          image: item.image,
+          name: item.name,
+          brand: item.brand,
+          price: item.price,
+          qty: item.quantity,
+          size: item.size,
+        })),
+      );
+    };
+
+    syncCart();
+    window.addEventListener("storage", syncCart);
+    window.addEventListener(cartUpdatedEvent, syncCart);
+
+    return () => {
+      window.removeEventListener("storage", syncCart);
+      window.removeEventListener(cartUpdatedEvent, syncCart);
+    };
+  }, []);
+
+  const updateQty = (item: CartItem, change: number) => {
+    updateCartItemQuantity(item.id, item.qty + change, item.size);
   };
 
-  const removeItem = (name: string) => {
-    setItems((prev) => prev.filter((item) => item.name !== name));
+  const removeItem = (item: CartItem) => {
+    removeCartItem(item.id, item.size);
   };
 
   const { subtotal, freeDeliveryThreshold, remainingForFreeDelivery, delivery, total } =
@@ -567,21 +604,28 @@ export function CartPagePreview({
           <div className="space-y-4">
             {items.map((item) => (
               <div
-                key={item.name}
+                key={`${item.id}-${item.size ?? ""}`}
                 className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
               >
-                <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-stone-100 text-xs text-slate-400">
-                  Image
+                <div className="overflow-hidden rounded-xl bg-stone-100">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="h-24 w-24 object-cover"
+                  />
                 </div>
 
                 <div className="flex-1">
                   <div className="text-xs text-slate-500">{item.brand}</div>
                   <div className="font-semibold">{item.name}</div>
+                  {item.size ? (
+                    <div className="mt-1 text-xs text-slate-500">{item.size}</div>
+                  ) : null}
 
                   <div className="mt-3 flex items-center gap-3">
                     <button
                       type="button"
-                      onClick={() => updateQty(item.name, -1)}
+                      onClick={() => updateQty(item, -1)}
                       className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-sm font-semibold text-slate-700 transition hover:scale-110 hover:bg-stone-50 active:scale-95"
                     >
                       −
@@ -591,7 +635,7 @@ export function CartPagePreview({
                     </span>
                     <button
                       type="button"
-                      onClick={() => updateQty(item.name, 1)}
+                      onClick={() => updateQty(item, 1)}
                       className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-sm font-semibold text-slate-700 transition hover:scale-110 hover:bg-stone-50 active:scale-95"
                     >
                       +
@@ -606,7 +650,7 @@ export function CartPagePreview({
                   <button
                     type="button"
                     aria-label="Remove item"
-                    onClick={() => removeItem(item.name)}
+                    onClick={() => removeItem(item)}
                     className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-600 transition hover:scale-105 hover:bg-rose-100 hover:text-rose-700"
                   >
                     <span>Remove</span>

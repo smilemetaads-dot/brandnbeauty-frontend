@@ -2,19 +2,32 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+import { cartUpdatedEvent, clearCart, readCart, type StoredCartItem } from "@/lib/cart/store";
+import type { CreateOrderInput } from "@/lib/orders/types";
+import type { StorefrontStoreSettings } from "@/lib/settings/storeSettings";
 
 type SiteHeaderProps = {
   title?: string;
 };
 
 type CartItem = {
+  id: string;
+  slug: string;
+  sku: string;
   name: string;
-  size: string;
   brand: string;
+  category: string;
+  concern: string;
+  status: string;
   price: number;
   qty: number;
   image: string;
+};
+
+type RealCheckoutPageProps = {
+  storeSettings: StorefrontStoreSettings;
 };
 
 function SiteHeader({ title = "" }: SiteHeaderProps) {
@@ -26,20 +39,24 @@ function SiteHeader({ title = "" }: SiteHeaderProps) {
         </Link>
         <div className="text-sm text-slate-500">{title}</div>
         <Link href="/cart" className="rounded-full bg-[#5E7F85] px-5 py-2 text-sm font-semibold text-white shadow-sm">
-          Bag 2
+          Bag
         </Link>
       </div>
     </header>
   );
 }
 
-export default function RealCheckoutPage() {
+export default function RealCheckoutPage({
+  storeSettings,
+}: RealCheckoutPageProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("Dhaka");
   const [selectedThana, setSelectedThana] = useState("Mirpur");
   const [shippingMethod, setShippingMethod] = useState<"inside" | "outside">("inside");
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [items, setItems] = useState<CartItem[]>([]);
 
   const districtOptions: Record<string, string[]> = {
     Bagerhat: [
@@ -526,49 +543,48 @@ export default function RealCheckoutPage() {
     Thakurgaon: ["Thakurgaon Sadar", "Baliadangi", "Haripur", "Pirganj", "Ranisankail"],
   };
 
-  const items: CartItem[] = [
-    {
-      name: "Acne Balance Facewash",
-      size: "100ml",
-      brand: "Some By Mi",
-      price: 890,
-      qty: 1,
-      image: "/products/pdp-1.jpg",
-    },
-    {
-      name: "Barrier Calm Serum",
-      size: "30ml",
-      brand: "BrandnBeauty",
-      price: 990,
-      qty: 1,
-      image: "/products/pdp-2.jpg",
-    },
-  ];
+  useEffect(() => {
+    const syncCart = () => {
+      setItems(
+        readCart().map((item: StoredCartItem) => ({
+          id: item.id,
+          slug: item.slug,
+          sku: item.sku,
+          name: item.name,
+          brand: item.brand,
+          category: item.category,
+          concern: item.concern,
+          status: item.status,
+          price: item.price,
+          qty: item.quantity,
+          image: item.image,
+        })),
+      );
+    };
+
+    syncCart();
+    window.addEventListener("storage", syncCart);
+    window.addEventListener(cartUpdatedEvent, syncCart);
+
+    return () => {
+      window.removeEventListener("storage", syncCart);
+      window.removeEventListener(cartUpdatedEvent, syncCart);
+    };
+  }, []);
 
   const subtotal = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.qty, 0),
     [items]
   );
-  const dhakaSubAreaThanas = [
-    "Keraniganj",
-    "Demra",
-    "Savar",
-    "Ashulia",
-    "Dhamrai",
-    "Dohar",
-    "Nawabganj",
-  ];
-  const dhakaCityDelivery = 60;
-  const dhakaSubAreaDelivery = 80;
-  const outsideDhakaDelivery = 120;
-
   const isDhaka = selectedDistrict === "Dhaka";
-  const isDhakaSubArea = isDhaka && dhakaSubAreaThanas.includes(selectedThana);
-  const delivery = isDhaka
-    ? isDhakaSubArea
-      ? dhakaSubAreaDelivery
-      : dhakaCityDelivery
-    : outsideDhakaDelivery;
+  const configuredDelivery = isDhaka
+    ? storeSettings.insideDhakaDelivery
+    : storeSettings.outsideDhakaDelivery;
+  const delivery =
+    storeSettings.freeDeliveryMinAmount > 0 &&
+    subtotal >= storeSettings.freeDeliveryMinAmount
+      ? 0
+      : configuredDelivery;
   const total = subtotal + delivery;
 
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -576,23 +592,55 @@ export default function RealCheckoutPage() {
     const nextThana = districtOptions[district][0];
     setSelectedDistrict(district);
     setSelectedThana(nextThana);
-    setShippingMethod(
-      district === "Dhaka"
-        ? dhakaSubAreaThanas.includes(nextThana)
-          ? "outside"
-          : "inside"
-        : "outside"
-    );
+    setShippingMethod(district === "Dhaka" ? "inside" : "outside");
   };
 
   const formatBDT = (n: number) => `৳${n.toLocaleString()}`;
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setIsSubmitting(true);
+    setSubmitError("");
 
-    setTimeout(() => {
-      router.push("/thankyou");
-    }, 1200);
+    const formData = new FormData(event.currentTarget);
+    const payload: CreateOrderInput = {
+      customer_name: String(formData.get("customer_name") ?? "").trim(),
+      customer_phone: String(formData.get("customer_phone") ?? "").trim(),
+      customer_address: String(formData.get("customer_address") ?? "").trim(),
+      customer_city: selectedDistrict,
+      customer_note: String(formData.get("customer_note") ?? "").trim(),
+      subtotal,
+      delivery_charge: delivery,
+      discount: 0,
+      total,
+      items,
+    };
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      const result = (await response.json()) as {
+        orderNumber?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !result.orderNumber) {
+        throw new Error(result.error ?? "Order could not be placed right now.");
+      }
+
+      clearCart();
+      router.push(`/thankyou?order=${encodeURIComponent(result.orderNumber)}`);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Order could not be placed right now.",
+      );
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -604,25 +652,34 @@ export default function RealCheckoutPage() {
           Order &amp; Shipping Details
         </h1>
 
-        <div className="mt-8 grid items-stretch gap-6 lg:grid-cols-[1fr_380px]">
+        <form
+          onSubmit={handlePlaceOrder}
+          className="mt-8 grid items-stretch gap-6 lg:grid-cols-[1fr_380px]"
+        >
           <div className="h-full">
             <div className="h-full rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
               <div className="grid gap-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <input
+                    name="customer_name"
                     className="rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-[#5E7F85]"
                     placeholder="Full Name"
+                    required
                   />
                   <input
+                    name="customer_phone"
                     className="rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-[#5E7F85]"
                     placeholder="Phone Number"
+                    required
                   />
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <textarea
+                    name="customer_address"
                     className="min-h-[56px] rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-[#5E7F85] md:min-h-[56px]"
                     placeholder="Address"
+                    required
                   />
 
                   <input
@@ -632,6 +689,7 @@ export default function RealCheckoutPage() {
                 </div>
 
                 <textarea
+                  name="customer_note"
                   className="min-h-[120px] rounded-2xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-[#5E7F85]"
                   placeholder="Order Note (Optional)"
                 />
@@ -655,11 +713,7 @@ export default function RealCheckoutPage() {
                       const nextThana = e.target.value;
                       setSelectedThana(nextThana);
                       setShippingMethod(
-                        selectedDistrict === "Dhaka"
-                          ? dhakaSubAreaThanas.includes(nextThana)
-                            ? "outside"
-                            : "inside"
-                          : "outside"
+                        selectedDistrict === "Dhaka" ? "inside" : "outside",
                       );
                     }}
                     className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-[#5E7F85]"
@@ -732,8 +786,13 @@ export default function RealCheckoutPage() {
             </div>
 
             <div className="mt-auto">
+              {submitError ? (
+                <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                  {submitError}
+                </div>
+              ) : null}
               <button
-                onClick={handlePlaceOrder}
+                type="submit"
                 disabled={isSubmitting}
                 className="mt-6 w-full rounded-2xl bg-[#5E7F85] py-4 text-sm font-semibold text-white shadow-sm disabled:opacity-70"
               >
@@ -741,7 +800,7 @@ export default function RealCheckoutPage() {
               </button>
             </div>
           </aside>
-        </div>
+        </form>
       </section>
     </div>
   );

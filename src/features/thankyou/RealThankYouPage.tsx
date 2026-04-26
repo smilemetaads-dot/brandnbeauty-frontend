@@ -1,15 +1,24 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
+
+import type { SavedOrderDetails } from "@/lib/orders/types";
 
 type SiteHeaderProps = {
   title?: string;
 };
 
 type OrderedItem = {
+  id: string;
+  slug: string;
+  sku: string;
   name: string;
-  size: string;
+  size?: string;
   brand: string;
+  category: string;
+  concern: string;
+  status: string;
   price: number;
   qty: number;
   image: string;
@@ -31,9 +40,9 @@ function SiteHeader({ title = "" }: SiteHeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-6">
-        <a href="/" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <img src="/logo.png" alt="BrandnBeauty" className="h-10 w-auto" />
-        </a>
+        </Link>
         <div className="text-sm text-slate-500">{title}</div>
         <button className="rounded-full bg-[#5E7F85] px-5 py-2 text-sm font-semibold text-white shadow-sm">
           Bag 0
@@ -43,45 +52,80 @@ function SiteHeader({ title = "" }: SiteHeaderProps) {
   );
 }
 
-export default function RealThankYouPage() {
-  const invoiceRef = React.useRef<HTMLDivElement | null>(null);
-  const orderId = "BNB-240316-1024";
-
-  const customer: CustomerDetails = {
+const fallbackOrder: SavedOrderDetails = {
+  orderNumber: "BNB-240316-1024",
+  customer: {
     name: "Ismail Hossain Chowdhury",
     phone: "8801680125043",
-    email: "smilemetaads@gmail.com",
     address: "Dhaka, Bangladesh",
-    area: "Dhaka Sadar",
     city: "Dhaka",
-    deliveryType: "Inside Dhaka",
-    payment: "Cash on Delivery",
     note: "N/A",
-  };
-
-  const orderedItems: OrderedItem[] = [
+  },
+  amounts: {
+    subtotal: 1880,
+    deliveryCharge: 60,
+    discount: 0,
+    total: 1940,
+  },
+  items: [
     {
+      id: "prd_acne_balance_facewash",
+      slug: "acne-balance-facewash",
+      sku: "BNB-SMB-ACNE-100",
       name: "Acne Balance Facewash",
       size: "100ml",
       brand: "Some By Mi",
+      category: "Skincare",
+      concern: "Acne",
+      status: "active",
       price: 890,
       qty: 1,
       image: "/products/pdp-1.jpg",
     },
     {
+      id: "prd_barrier_calm_serum",
+      slug: "barrier-calm-serum",
+      sku: "BNB-BNB-SERUM-30",
       name: "Barrier Calm Serum",
       size: "30ml",
       brand: "BrandnBeauty",
+      category: "Skincare",
+      concern: "Sensitive Skin",
+      status: "active",
       price: 990,
       qty: 1,
       image: "/products/pdp-2.jpg",
     },
-  ];
+  ],
+};
 
-  const deliveryCharge = 60;
-  const discount = 100;
-  const subtotal = orderedItems.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const total = subtotal + deliveryCharge - discount;
+export default function RealThankYouPage({
+  orderDetails = fallbackOrder,
+}: {
+  orderDetails?: SavedOrderDetails | null;
+}) {
+  const invoiceRef = React.useRef<HTMLDivElement | null>(null);
+  const resolvedOrder = orderDetails ?? fallbackOrder;
+  const orderId = resolvedOrder.orderNumber;
+
+  const customer: CustomerDetails = {
+    name: resolvedOrder.customer.name,
+    phone: resolvedOrder.customer.phone,
+    email: "N/A",
+    address: resolvedOrder.customer.address,
+    area: resolvedOrder.customer.city,
+    city: resolvedOrder.customer.city,
+    deliveryType: "Standard Delivery",
+    payment: "Cash on Delivery",
+    note: resolvedOrder.customer.note || "N/A",
+  };
+
+  const orderedItems: OrderedItem[] = resolvedOrder.items;
+
+  const deliveryCharge = resolvedOrder.amounts.deliveryCharge;
+  const discount = resolvedOrder.amounts.discount;
+  const subtotal = resolvedOrder.amounts.subtotal;
+  const total = resolvedOrder.amounts.total;
 
   const formatBDT = (n: number) => `৳${n.toLocaleString()}`;
 
